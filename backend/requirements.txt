@@ -15,3 +15,7 @@ pytesseract==0.3.10
 sounddevice==0.4.6
 scipy==1.11.3
 aiofiles==23.2.1
+pydub==0.25.1
+ultralytics====8.3.94
+fastapi=0.115.11
+uvicorn=0.34.0

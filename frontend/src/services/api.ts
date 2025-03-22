@@ -1,3 +1,4 @@
+// src/services/api.ts
 import { WebcamStream, ProcessedFrame } from '@/types/api';
 
 interface WebSocketCallbacks {
@@ -124,30 +125,89 @@ class ApiService {
       throw new Error('WebSocket is not connected');
     }
 
-    const formData = new FormData();
-    formData.append('video', frame.video);
-    formData.append('audio', frame.audio);
-    formData.append('timestamp', frame.timestamp.toString());
-
-    this.ws.send(formData);
+    // We can't send FormData directly over WebSocket, so we'll send JSON instead
+    // For binary data like video/audio, we'll use Base64 encoding
+    try {
+      // Convert video blob to base64
+      const videoBase64 = await this.blobToBase64(frame.video);
+      
+      // Convert audio blob to base64
+      const audioBase64 = await this.blobToBase64(frame.audio);
+      
+      // Create a JSON message
+      const message = JSON.stringify({
+        type: 'frame',
+        data: {
+          video: videoBase64,
+          audio: audioBase64,
+          timestamp: frame.timestamp
+        }
+      });
+      
+      // Send the JSON message over WebSocket
+      this.ws.send(message);
+    } catch (error) {
+      console.error('Error preparing data for WebSocket:', error);
+      throw error;
+    }
   }
 
-  async sendFrame(frame: WebcamStream): Promise<void> {
+  // Helper method to convert a Blob to a base64 string
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // reader.result is a data URL like "data:image/jpeg;base64,/9j/4AAQSkZ..."
+        // We only want the base64 part after the comma
+        const base64String = reader.result as string;
+        const base64Data = base64String.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async sendFrame(frame: WebcamStream): Promise<ProcessedFrame | null> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       // Queue the frame if WebSocket is not connected
       this.frameQueue.push(frame);
       this.processFrameQueue();
-      return;
+      return null;
     }
 
     try {
       await this.sendFrameInternal(frame);
+      
+      // Return a Promise that will resolve when we get a response from the server
+      return new Promise((resolve, reject) => {
+        // Set up a one-time message handler to catch the response
+        const handleMessage = (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data) as ProcessedFrame;
+            this.ws?.removeEventListener('message', handleMessage);
+            clearTimeout(timeout);
+            resolve(data);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        // Set up a timeout to prevent waiting indefinitely
+        const timeout = setTimeout(() => {
+          this.ws?.removeEventListener('message', handleMessage);
+          resolve(null); // Resolve with null instead of rejecting
+        }, 5000); // 5 second timeout
+        
+        // Add the temporary event listener
+        this.ws?.addEventListener('message', handleMessage);
+      });
     } catch (error) {
       console.error('Failed to send frame:', error);
       // Queue the frame if sending fails
       this.frameQueue.push(frame);
       this.processFrameQueue();
-      throw new Error('Failed to send frame');
+      return null;
     }
   }
 
@@ -170,6 +230,54 @@ class ApiService {
     }
   }
 
+  async sendAudio(audioBlob: Blob): Promise<ProcessedFrame | null> {
+    // Similar implementation to sendFrame, but for audio-only data
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      return null;
+    }
+
+    try {
+      // Convert audio blob to base64
+      const audioBase64 = await this.blobToBase64(audioBlob);
+      
+      // Create a JSON message
+      const message = JSON.stringify({
+        type: 'audio',
+        data: {
+          audio: audioBase64,
+          timestamp: Date.now()
+        }
+      });
+      
+      // Send the JSON message over WebSocket
+      this.ws.send(message);
+      
+      // Return a Promise that will resolve when we get a response
+      return new Promise((resolve, reject) => {
+        const handleMessage = (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data) as ProcessedFrame;
+            this.ws?.removeEventListener('message', handleMessage);
+            clearTimeout(timeout);
+            resolve(data);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        const timeout = setTimeout(() => {
+          this.ws?.removeEventListener('message', handleMessage);
+          resolve(null);
+        }, 5000);
+        
+        this.ws?.addEventListener('message', handleMessage);
+      });
+    } catch (error) {
+      console.error('Failed to send audio:', error);
+      return null;
+    }
+  }
+
   disconnect(): void {
     if (this.ws) {
       this.ws.close();
@@ -183,4 +291,4 @@ class ApiService {
   }
 }
 
-export const apiService = ApiService.getInstance(); 
+export const apiService = ApiService.getInstance();

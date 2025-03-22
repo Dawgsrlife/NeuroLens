@@ -9,8 +9,10 @@ from typing import List, Tuple, Dict, Any, Optional
 from PIL import Image
 import pytesseract
 from openai import OpenAI
+from ultralytics import YOLO
+import torch
 from app.config import settings
-from app.models.schemas import DetectedObject, DetectedText, Caption, CaptionType, CaptionPriority, ProcessedFrame
+from app.models.schemas import DetectedObject, DetectedText, Caption, CaptionType, CaptionPriority, ProcessedFrame, VoiceFeedback
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,23 @@ class VisionService:
         self.ocr_confidence_threshold = settings.OCR_CONFIDENCE_THRESHOLD
         self.last_processed_frame = None
         self.frame_counter = 0
+        
+        # Initialize YOLOv8 nano model - smallest version for edge devices
+        try:
+            # Try to load from a local path first if it exists
+            model_path = "models/yolov8n.pt"
+            import os
+            if os.path.exists(model_path):
+                self.yolo_model = YOLO(model_path)
+            else:
+                # Download from Ultralytics
+                self.yolo_model = YOLO("yolov8n.pt")
+            
+            logger.info("YOLOv8 nano model loaded successfully")
+            self.yolo_available = True
+        except Exception as e:
+            logger.error(f"Failed to load YOLOv8 model: {str(e)}")
+            self.yolo_available = False
     
     async def process_frame(self, frame_data: bytes) -> ProcessedFrame:
         """Process a single frame from the webcam"""
@@ -131,56 +150,130 @@ class VisionService:
             return "Unable to describe the scene at this time."
     
     async def _detect_objects(self, frame: np.ndarray) -> List[DetectedObject]:
-        """Detect objects in the frame using OpenCV or a dedicated model"""
-        # In a real implementation, you'd use a proper object detection model like YOLO or SSD
-        # For simplicity, we'll return a few placeholder objects based on regions of the frame
-        
-        # This is just a placeholder - in a real implementation, integrate with a proper object detection model
+        """Detect objects in the frame using YOLOv8 nano"""
+        detected_objects = []
         height, width = frame.shape[:2]
         
-        # Simulate detection by dividing the frame into regions
-        regions = [
-            (0, 0, width//2, height//2),
-            (width//2, 0, width, height//2),
-            (0, height//2, width//2, height),
-            (width//2, height//2, width, height),
-        ]
-        
-        detected_objects = []
-        
-        # For demonstration purposes only - this would be replaced with actual model inference
-        for i, (x1, y1, x2, y2) in enumerate(regions):
-            # Extract region and get its average color
-            region = frame[y1:y2, x1:x2]
-            avg_color = np.mean(region, axis=(0, 1))
-            
-            # Determine a placeholder object based on the color
-            if np.mean(avg_color) > 200:  # Very bright region
-                obj_name = "bright object"
-            elif np.mean(avg_color) < 50:  # Very dark region
-                obj_name = "dark object"
+        try:
+            if self.yolo_available:
+                # Run YOLOv8 inference on the frame
+                results = self.yolo_model.predict(
+                    source=frame,
+                    conf=self.confidence_threshold,
+                    verbose=False,
+                )
+                
+                # Process YOLOv8 results
+                if len(results) > 0:
+                    result = results[0]  # Get the first result
+                    
+                    # Extract boxes, confidence scores, and class IDs
+                    boxes = result.boxes.xyxy.cpu().numpy() if len(result.boxes) > 0 else []
+                    confs = result.boxes.conf.cpu().numpy() if len(result.boxes) > 0 else []
+                    class_ids = result.boxes.cls.cpu().numpy().astype(int) if len(result.boxes) > 0 else []
+                    
+                    # Get class names
+                    class_names = result.names
+                    
+                    # Process each detection
+                    for i, (box, conf, class_id) in enumerate(zip(boxes, confs, class_ids)):
+                        if conf >= self.confidence_threshold:
+                            x1, y1, x2, y2 = box
+                            
+                            # Get object name from class ID
+                            obj_name = class_names[class_id]
+                            
+                            # Calculate direction based on the object's position
+                            center_x = (x1 + x2) / 2
+                            if center_x < width / 3:
+                                direction = "left"
+                            elif center_x > 2 * width / 3:
+                                direction = "right"
+                            else:
+                                direction = "center"
+                            
+                            # Estimate distance based on the size of the bounding box and position
+                            # Objects lower in the frame and with larger boxes are typically closer
+                            box_height = y2 - y1
+                            box_relative_height = box_height / height
+                            y_position = (y1 + y2) / 2 / height  # Normalized y-position
+                            
+                            # Distance estimation formula - objects lower in the frame (higher y) are closer
+                            # and objects with larger bounding boxes are closer
+                            # This is a heuristic and can be refined with camera parameters
+                            distance = (1.0 - y_position) * 5.0  # 0-5 meters
+                            if box_relative_height > 0.5:
+                                distance *= 0.5  # Very large objects are closer
+                            elif box_relative_height > 0.25:
+                                distance *= 0.75  # Large objects are closer
+                                
+                            # Clamp distance between 0.5 and 10 meters
+                            distance = max(0.5, min(10.0, distance))
+                            
+                            detected_objects.append(DetectedObject(
+                                name=obj_name,
+                                confidence=float(conf),
+                                bbox=[float(x1), float(y1), float(x2), float(y2)],
+                                distance=distance,
+                                direction=direction
+                            ))
             else:
-                obj_name = f"object {i+1}"
-            
-            # Calculate a direction based on the region position
-            if x1 < width // 3:
-                direction = "left"
-            elif x1 > 2 * width // 3:
-                direction = "right"
-            else:
-                direction = "center"
-            
-            # Calculate a fake distance based on y-position (lower in the frame = closer)
-            relative_y = y1 / height
-            distance = 1.0 + 4.0 * relative_y  # 1 to 5 meters
-            
-            detected_objects.append(DetectedObject(
-                name=obj_name,
-                confidence=0.8,  # Placeholder confidence
-                bbox=[float(x1), float(y1), float(x2), float(y2)],
-                distance=distance,
-                direction=direction
-            ))
+                # If YOLO is not available, fall back to the simple region-based approach
+                logger.warning("YOLO model not available. Using fallback object detection.")
+                
+                # Simulate detection by dividing the frame into regions
+                regions = [
+                    (0, 0, width//2, height//2),
+                    (width//2, 0, width, height//2),
+                    (0, height//2, width//2, height),
+                    (width//2, height//2, width, height),
+                ]
+                
+                for i, (x1, y1, x2, y2) in enumerate(regions):
+                    # Extract region and get its average color
+                    region = frame[y1:y2, x1:x2]
+                    avg_color = np.mean(region, axis=(0, 1))
+                    
+                    # Determine a placeholder object based on the color
+                    if np.mean(avg_color) > 200:  # Very bright region
+                        obj_name = "bright object"
+                    elif np.mean(avg_color) < 50:  # Very dark region
+                        obj_name = "dark object"
+                    else:
+                        obj_name = f"object {i+1}"
+                    
+                    # Calculate a direction based on the region position
+                    if x1 < width // 3:
+                        direction = "left"
+                    elif x1 > 2 * width // 3:
+                        direction = "right"
+                    else:
+                        direction = "center"
+                    
+                    # Calculate a fake distance based on y-position (lower in the frame = closer)
+                    relative_y = y1 / height
+                    distance = 1.0 + 4.0 * relative_y  # 1 to 5 meters
+                    
+                    detected_objects.append(DetectedObject(
+                        name=obj_name,
+                        confidence=0.8,  # Placeholder confidence
+                        bbox=[float(x1), float(y1), float(x2), float(y2)],
+                        distance=distance,
+                        direction=direction
+                    ))
+        
+        except Exception as e:
+            logger.error(f"Error detecting objects: {str(e)}")
+            # If there's an error, return an empty list or fallback to simple regions
+            if not detected_objects:
+                # Placeholder object in the center
+                detected_objects.append(DetectedObject(
+                    name="unknown object",
+                    confidence=0.5,
+                    bbox=[float(width/4), float(height/4), float(3*width/4), float(3*height/4)],
+                    distance=2.0,
+                    direction="center"
+                ))
         
         return detected_objects
     

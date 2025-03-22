@@ -1,46 +1,31 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { MicrophoneIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+'use client';
+
+import { motion } from 'framer-motion';
+import { useTheme } from 'next-themes';
+import { SpeakerWaveIcon } from '@heroicons/react/24/outline';
 
 interface FeedbackCardProps {
   feedback: string;
 }
 
 export const FeedbackCard = ({ feedback }: FeedbackCardProps) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 h-full flex flex-col"
-    >
-      <div className="flex items-center space-x-2 mb-4">
-        <MicrophoneIcon className="w-5 h-5 text-blue-500" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Real-time Feedback</h3>
+    <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="flex items-center space-x-3 mb-4">
+        <SpeakerWaveIcon className={`w-6 h-6 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Voice Feedback</h3>
       </div>
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={feedback}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap"
-          >
-            {displayedText}
-            {isTyping && (
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                className="inline-block w-2 h-4 ml-1 bg-blue-500 rounded"
-              />
-            )}
-          </motion.p>
-        </AnimatePresence>
-      </div>
-    </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} italic`}
+      >
+        {feedback || 'No feedback available yet'}
+      </motion.div>
+    </div>
   );
 }; 

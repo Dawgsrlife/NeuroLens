@@ -24,16 +24,6 @@ export const ThemeToggle = () => {
       <AnimatePresence mode="wait">
         {resolvedTheme === 'dark' ? (
           <motion.div
-            key="sun"
-            initial={{ rotate: -180, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            exit={{ rotate: 180, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <SunIcon className="w-6 h-6 text-yellow-400" />
-          </motion.div>
-        ) : (
-          <motion.div
             key="moon"
             initial={{ rotate: -180, opacity: 0 }}
             animate={{ rotate: 0, opacity: 1 }}
@@ -41,6 +31,16 @@ export const ThemeToggle = () => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <MoonIcon className="w-6 h-6 text-gray-600" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="sun"
+            initial={{ rotate: -180, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: 180, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <SunIcon className="w-6 h-6 text-yellow-400" />
           </motion.div>
         )}
       </AnimatePresence>

@@ -9,6 +9,7 @@ import { WebcamCapture } from "@/components/WebcamCapture";
 import { CaptionDisplay } from "@/components/CaptionDisplay";
 import { VoiceFeedback } from "@/components/VoiceFeedback";
 import { apiService } from "@/services/api";
+import { VoiceInteractionPanel } from "@/components/VoiceInteractionPanel";
 import { Caption, VoiceFeedback as VoiceFeedbackType } from "@/types/api";
 import { Logo } from "@/components/ui/Logo";
 import {
@@ -158,7 +159,6 @@ export default function Home() {
             </div>
           </AnimatedContainer>
 
-          {/* Status and Feedback Cards */}
           <div className="space-y-6 h-full">
             <AnimatedContainer variant="slide" direction="right" delay={0.2}>
               <StatusCard isActive={isAssistantActive} />
@@ -172,6 +172,10 @@ export default function Home() {
               <FeedbackCard
                 feedback={voiceFeedback?.text || "No feedback yet"}
               />
+            </AnimatedContainer>
+
+            <AnimatedContainer variant="slide" direction="right" delay={0.4}>
+              <VoiceInteractionPanel />
             </AnimatedContainer>
           </div>
         </div>

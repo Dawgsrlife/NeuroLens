@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AnimatedContainer } from '@/components/ui/AnimatedContainer';
@@ -10,23 +10,27 @@ import { useTheme } from 'next-themes';
 import { useHotkeys } from '@/hooks/useHotkeys';
 
 export default function Settings() {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, theme } = useTheme();
+  const isDark = mounted ? resolvedTheme === 'dark' : false;
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
-  const hotkeys = useHotkeys();
+  const hotkeys = useHotkeys(false);
 
-  // Handle ESC key to return to home
+  // Handle mounted state and theme
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        // Save current scroll position before navigating
-        localStorage.setItem('homePageScrollPosition', window.scrollY.toString());
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        localStorage.setItem('mainPageScrollPosition', window.scrollY.toString());
         router.push('/');
       }
       
       // Open About Page (Cmd/Ctrl + I)
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'i') {
-        event.preventDefault();
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
         router.push('/about');
       }
     };
@@ -57,8 +61,13 @@ export default function Settings() {
     }
   }, []);
 
+  // Don't render anything until mounted to prevent theme flash
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}

@@ -21,47 +21,30 @@ import { StatusCard } from "@/components/StatusCard";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { useTheme } from 'next-themes';
 import { useHotkeys } from '@/hooks/useHotkeys';
+import { useScrollPosition } from '@/hooks/useScrollPosition';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, theme } = useTheme();
+  const isDark = mounted ? resolvedTheme === 'dark' : false;
+  const router = useRouter();
+  const mainContentRef = useRef<HTMLDivElement>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAssistantActive, setIsAssistantActive] = useState(false);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [captions, setCaptions] = useState<Caption[]>([]);
-  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType | null>(
-    null
-  );
+  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const mainContentRef = useRef<HTMLDivElement>(null);
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = mounted ? resolvedTheme === 'dark' : false;
   const [isRecording, setIsRecording] = useState(false);
   const hotkeys = useHotkeys(true);
+  useScrollPosition();
 
-  // Handle mounted state and scroll restoration
+  // Handle mounted state and theme
   useEffect(() => {
     setMounted(true);
-    
-    // Restore scroll position if it exists
-    const savedScrollPosition = localStorage.getItem('homePageScrollPosition');
-    if (savedScrollPosition) {
-      setTimeout(() => {
-        window.scrollTo(0, parseInt(savedScrollPosition));
-        localStorage.removeItem('homePageScrollPosition'); // Clear the saved position
-      }, 100);
-    }
-  }, []);
-
-  // Save scroll position before navigating away
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      localStorage.setItem('homePageScrollPosition', window.scrollY.toString());
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   const toggleAssistant = () => {

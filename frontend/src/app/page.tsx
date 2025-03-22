@@ -32,9 +32,15 @@ export default function Home() {
     null
   );
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const isDark = mounted ? resolvedTheme === 'dark' : false;
+
+  // Handle mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -90,6 +96,11 @@ export default function Home() {
     // Smooth scroll to main content
     mainContentRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Don't render anything until mounted to prevent theme flash
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>

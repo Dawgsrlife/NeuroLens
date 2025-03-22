@@ -153,31 +153,32 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
   };
 
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border ${isDark ? 'border-gray-700' : 'border-gray-200'} ${className}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className={`p-6 rounded-xl shadow-sm border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} ${className}`}
+    >
       <div className="flex items-center space-x-3 mb-4">
-        <OutlinedMicrophoneIcon className={`w-6 h-6 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
-        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Voice Commands</h3>
+        <OutlinedMicrophoneIcon className={`w-6 h-6 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
+        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Voice Commands
+        </h3>
       </div>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Start/Stop Assistant</span>
-          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-            Space
-          </kbd>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Toggle Settings</span>
-          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-            ⌘,
-          </kbd>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Toggle Theme</span>
-          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-            ⌘D
-          </kbd>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+        className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+      >
+        <p>Available commands:</p>
+        <ul className="list-disc list-inside space-y-2">
+          <li>"What do you see?" - Get a description of your surroundings</li>
+          <li>"Where is the [object]?" - Locate specific objects</li>
+          <li>"Read this text" - Read text in your field of view</li>
+          <li>"Stop" - Stop the current command</li>
+        </ul>
+      </motion.div>
       <div className="mt-4">
         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           {isListening
@@ -254,6 +255,6 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

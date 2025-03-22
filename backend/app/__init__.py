@@ -1,3 +1,0 @@
-"""
-NeuroLens Backend Application
-""" 

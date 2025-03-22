@@ -1,0 +1,8 @@
+# === Python / Backend ===
+/backend/__pycache__/
+/backend/**/*.pyc
+/backend/**/*.pyo
+/backend/**/*.pyd
+/backend/env/
+/backend/.env
+/backend/app/.env

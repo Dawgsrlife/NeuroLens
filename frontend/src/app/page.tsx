@@ -86,14 +86,47 @@ export default function Home() {
       </AnimatedContainer>
 
       {/* Hero Section */}
-      <AnimatedContainer variant="fade" className="pt-24 pb-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          AI-Powered Vision Assistant
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Empowering individuals with visual impairments through real-time object detection and voice feedback
-        </p>
-      </AnimatedContainer>
+      <section className="relative min-h-screen flex items-center justify-center pt-48 pb-16">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 -z-10" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="space-y-6"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white"
+            >
+              AI-Powered Vision Assistant
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
+            >
+              Empowering independence through real-time object detection and voice feedback
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mt-8"
+            >
+              <button
+                onClick={() => setIsAssistantActive(!isAssistantActive)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
+              </button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
@@ -110,26 +143,21 @@ export default function Home() {
           </AnimatedContainer>
 
           {/* Status and Feedback Cards */}
-          <div className="space-y-6">
+          <div className="space-y-6 h-full">
             <AnimatedContainer variant="slide" direction="right" delay={0.2}>
               <StatusCard isActive={isAssistantActive} />
             </AnimatedContainer>
-            <AnimatedContainer variant="slide" direction="right" delay={0.3}>
+            <AnimatedContainer variant="slide" direction="right" delay={0.3} className="h-[calc(100%-6rem)]">
               <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
             </AnimatedContainer>
           </div>
         </div>
 
-        {/* Captions and Voice Feedback */}
-        <div className="mt-8 space-y-4">
+        {/* Captions */}
+        <div className="mt-8">
           <AnimatedContainer variant="slide" direction="up" delay={0.4}>
             <CaptionDisplay captions={captions} />
           </AnimatedContainer>
-          {voiceFeedback && (
-            <AnimatedContainer variant="slide" direction="up" delay={0.5}>
-              <VoiceFeedback feedback={voiceFeedback} />
-            </AnimatedContainer>
-          )}
         </div>
       </div>
 

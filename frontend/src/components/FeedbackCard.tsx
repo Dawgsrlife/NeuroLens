@@ -1,36 +1,26 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { MicrophoneIcon } from '@heroicons/react/24/outline';
 
 interface FeedbackCardProps {
-  feedback?: string;
+  feedback: string;
 }
 
-export const FeedbackCard = ({ feedback = 'No feedback yet' }: FeedbackCardProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
+export const FeedbackCard = ({ feedback }: FeedbackCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 h-full flex flex-col"
     >
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        Real-time Feedback
-      </h3>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="relative"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg" />
-        <p className="text-gray-600 dark:text-gray-300 relative">
+      <div className="flex items-center space-x-2 mb-4">
+        <MicrophoneIcon className="w-5 h-5 text-blue-500" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Real-time Feedback</h3>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
           {feedback}
         </p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }; 

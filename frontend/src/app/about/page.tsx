@@ -107,23 +107,23 @@ export default function About() {
                 NeuroLens is being developed for the GenAI Genesis 2025 hackathon by a team passionate
                 about making technology more accessible and inclusive.
               </p>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                    <span className="text-blue-600 dark:text-blue-400 font-medium">AH</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
+                    AH
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Alexander He Meng</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">UI/UX Designer</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Alexander He Meng</h3>
+                    <p className="text-gray-600 dark:text-gray-300">UI/UX Designer</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                    <span className="text-purple-600 dark:text-purple-400 font-medium">MP</span>
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
+                    MP
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Mahan Pouromidi</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">AI Engineer</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mahan Pouromidi</h3>
+                    <p className="text-gray-600 dark:text-gray-300">AI Engineer</p>
                   </div>
                 </div>
               </div>

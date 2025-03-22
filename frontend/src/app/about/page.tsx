@@ -77,26 +77,26 @@ export default function About() {
           </AnimatedContainer>
 
           {/* Technology Stack */}
-          <AnimatedContainer delay={0.8}>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Technology Stack</h2>
+          <AnimatedContainer delay={0.6}>
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Technology Stack</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Frontend</h3>
-                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>Next.js</li>
-                    <li>TypeScript</li>
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>Frontend</h3>
+                  <ul className={`space-y-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>Next.js 14</li>
+                    <li>React</li>
                     <li>Tailwind CSS</li>
                     <li>Framer Motion</li>
                   </ul>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Backend</h3>
-                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>Node.js</li>
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>Backend</h3>
+                  <ul className={`space-y-1 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>Python</li>
                     <li>FastAPI</li>
                     <li>OpenCV</li>
-                    <li>OpenAI/Gemini</li>
+                    <li>TensorFlow</li>
                   </ul>
                 </div>
               </div>
@@ -104,30 +104,26 @@ export default function About() {
           </AnimatedContainer>
 
           {/* Team */}
-          <AnimatedContainer delay={1}>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">The Team</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                NeuroLens is being developed for the GenAI Genesis 2025 hackathon by a team passionate
-                about making technology more accessible and inclusive.
-              </p>
+          <AnimatedContainer delay={0.8}>
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+              <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Our Team</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
-                    AH
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Alexander He Meng</h3>
-                    <p className="text-gray-600 dark:text-gray-300">UI/UX Designer</p>
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`} />
+                    <div>
+                      <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Alexander He Meng</h3>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>UI/UX Designer</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
-                    MP
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mahan Pouromidi</h3>
-                    <p className="text-gray-600 dark:text-gray-300">AI Engineer</p>
+                <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`} />
+                    <div>
+                      <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Mahan Pouromidi</h3>
+                      <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Engineer</p>
+                    </div>
                   </div>
                 </div>
               </div>

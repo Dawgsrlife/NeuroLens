@@ -208,20 +208,20 @@ export default function Home() {
           <div className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             <p className="mb-4">© 2025 NeuroLens. All rights reserved.</p>
             <div className="flex flex-col items-center space-y-2">
-              <p className="text-sm">Created by</p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Created by</p>
               <div className="flex items-center space-x-4">
                 <div className="flex flex-col items-center">
                   <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Alexander He Meng
                   </span>
-                  <span className="text-xs text-gray-500">UI/UX Designer</span>
+                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>UI/UX Designer</span>
                 </div>
                 <div className={`w-px h-8 ${isDark ? 'bg-gray-700' : 'bg-gray-300'}`} />
                 <div className="flex flex-col items-center">
                   <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Mahan Pouromidi
                   </span>
-                  <span className="text-xs text-gray-500">AI Engineer</span>
+                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Engineer</span>
                 </div>
               </div>
             </div>

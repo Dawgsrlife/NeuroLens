@@ -4,19 +4,22 @@ import { motion } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
 
 export const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <motion.button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={toggleTheme}
-      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       <motion.div
         initial={false}
-        animate={{ rotate: theme === 'dark' ? 180 : 0 }}
+        animate={{ rotate: isDark ? 180 : 0 }}
         transition={{ duration: 0.3 }}
         className="relative w-6 h-6"
       >
@@ -26,8 +29,8 @@ export const ThemeToggle = () => {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          initial={{ opacity: theme === 'light' ? 1 : 0 }}
-          animate={{ opacity: theme === 'light' ? 1 : 0 }}
+          initial={{ opacity: isDark ? 0 : 1 }}
+          animate={{ opacity: isDark ? 0 : 1 }}
           transition={{ duration: 0.2 }}
         >
           <path
@@ -44,8 +47,8 @@ export const ThemeToggle = () => {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          initial={{ opacity: theme === 'dark' ? 1 : 0 }}
-          animate={{ opacity: theme === 'dark' ? 1 : 0 }}
+          initial={{ opacity: isDark ? 1 : 0 }}
+          animate={{ opacity: isDark ? 1 : 0 }}
           transition={{ duration: 0.2 }}
         >
           <path

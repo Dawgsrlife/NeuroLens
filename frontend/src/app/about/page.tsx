@@ -110,28 +110,19 @@ export default function About() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                    <span className="text-blue-600 dark:text-blue-400 font-medium">JD</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">AH</span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">John Doe</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Lead Developer</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                    <span className="text-purple-600 dark:text-purple-400 font-medium">AS</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Alice Smith</h3>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Alexander He Meng</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">UI/UX Designer</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                    <span className="text-green-600 dark:text-green-400 font-medium">MJ</span>
+                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                    <span className="text-purple-600 dark:text-purple-400 font-medium">MP</span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Mike Johnson</h3>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">Mahan Pouromidi</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">AI Engineer</p>
                   </div>
                 </div>

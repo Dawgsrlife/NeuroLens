@@ -3,6 +3,7 @@ import { WebcamStream, ProcessedFrame } from '@/types/api';
 interface WebSocketCallbacks {
   onMessage: (data: ProcessedFrame) => void;
   onError: (error: string) => void;
+  onConnectionStateChange?: (isConnected: boolean) => void;
 }
 
 class ApiService {
@@ -13,6 +14,8 @@ class ApiService {
   private reconnectTimeout = 1000;
   private isConnecting = false;
   private callbacks: WebSocketCallbacks | null = null;
+  private frameQueue: WebcamStream[] = [];
+  private isProcessingQueue = false;
 
   private constructor() {}
 
@@ -39,6 +42,8 @@ class ApiService {
         console.log('WebSocket connected');
         this.reconnectAttempts = 0;
         this.isConnecting = false;
+        this.callbacks?.onConnectionStateChange?.(true);
+        this.processFrameQueue();
       };
 
       this.ws.onmessage = (event) => {
@@ -54,6 +59,7 @@ class ApiService {
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         this.isConnecting = false;
+        this.callbacks?.onConnectionStateChange?.(false);
         this.callbacks?.onError('Connection error. Attempting to reconnect...');
         this.handleReconnect();
       };
@@ -61,11 +67,13 @@ class ApiService {
       this.ws.onclose = (event) => {
         console.log('WebSocket closed:', event.code, event.reason);
         this.isConnecting = false;
+        this.callbacks?.onConnectionStateChange?.(false);
         this.handleReconnect();
       };
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
       this.isConnecting = false;
+      this.callbacks?.onConnectionStateChange?.(false);
       this.callbacks?.onError('Failed to establish connection');
       this.handleReconnect();
     }
@@ -91,20 +99,54 @@ class ApiService {
     }
   }
 
-  async sendFrame(frame: WebcamStream): Promise<void> {
+  private async processFrameQueue(): Promise<void> {
+    if (this.isProcessingQueue || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    this.isProcessingQueue = true;
+    while (this.frameQueue.length > 0) {
+      const frame = this.frameQueue.shift();
+      if (!frame) break;
+
+      try {
+        await this.sendFrameInternal(frame);
+      } catch (error) {
+        console.error('Failed to send frame from queue:', error);
+        // Put the frame back at the start of the queue
+        this.frameQueue.unshift(frame);
+        break;
+      }
+    }
+    this.isProcessingQueue = false;
+  }
+
+  private async sendFrameInternal(frame: WebcamStream): Promise<void> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       throw new Error('WebSocket is not connected');
     }
 
-    try {
-      const formData = new FormData();
-      formData.append('video', frame.video);
-      formData.append('audio', frame.audio);
-      formData.append('timestamp', frame.timestamp.toString());
+    const formData = new FormData();
+    formData.append('video', frame.video);
+    formData.append('audio', frame.audio);
+    formData.append('timestamp', frame.timestamp.toString());
 
-      this.ws.send(formData);
+    this.ws.send(formData);
+  }
+
+  async sendFrame(frame: WebcamStream): Promise<void> {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      // Queue the frame if WebSocket is not connected
+      this.frameQueue.push(frame);
+      this.processFrameQueue();
+      return;
+    }
+
+    try {
+      await this.sendFrameInternal(frame);
     } catch (error) {
       console.error('Failed to send frame:', error);
+      // Queue the frame if sending fails
+      this.frameQueue.push(frame);
+      this.processFrameQueue();
       throw new Error('Failed to send frame');
     }
   }
@@ -136,6 +178,8 @@ class ApiService {
     this.isConnecting = false;
     this.reconnectAttempts = 0;
     this.callbacks = null;
+    this.frameQueue = [];
+    this.isProcessingQueue = false;
   }
 }
 

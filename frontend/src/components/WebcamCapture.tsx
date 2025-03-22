@@ -3,14 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { apiService } from '@/services/api';
-import { WebcamStream } from '@/types/api';
+import { WebcamStream, ProcessedFrame } from '@/types/api';
 
 interface WebcamCaptureProps {
   isActive: boolean;
   onError: (error: string) => void;
+  onFrameProcessed: (frame: ProcessedFrame) => void;
 }
 
-export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
+export const WebcamCapture = ({ isActive, onError, onFrameProcessed }: WebcamCaptureProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -18,6 +19,8 @@ export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
   const frameIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const isRecordingRef = useRef(false);
+  const clientIdRef = useRef<string>(`client_${Math.random().toString(36).substr(2, 9)}`);
 
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -64,6 +67,16 @@ export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
         processorRef.current.connect(audioContextRef.current.destination);
       }
 
+      // Initialize WebSocket connection
+      await apiService.initializeWebSocket({
+        onMessage: (data) => {
+          onFrameProcessed(data);
+        },
+        onError: (error) => {
+          onError(error);
+        },
+      }, clientIdRef.current);
+
       // Start capturing frames
       startFrameCapture();
       setIsInitialized(true);
@@ -75,7 +88,10 @@ export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
   };
 
   const startFrameCapture = () => {
-    if (!videoRef.current || !mediaRecorderRef.current) return;
+    if (!videoRef.current || !mediaRecorderRef.current) {
+      console.warn('Required refs not initialized');
+      return;
+    }
 
     // Capture frames every 100ms
     frameIntervalRef.current = setInterval(async () => {
@@ -93,19 +109,59 @@ export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
 
         // Get audio data
         const audioBlob = await new Promise<Blob>((resolve) => {
+          if (!mediaRecorderRef.current) {
+            console.warn('MediaRecorder not initialized');
+            resolve(new Blob([], { type: 'audio/webm' }));
+            return;
+          }
+
           const chunks: BlobPart[] = [];
-          mediaRecorderRef.current!.ondataavailable = (e) => chunks.push(e.data);
-          mediaRecorderRef.current!.onstop = () => resolve(new Blob(chunks, { type: 'audio/webm' }));
-          mediaRecorderRef.current!.start();
-          setTimeout(() => mediaRecorderRef.current!.stop(), 100);
+          
+          // Stop any existing recording
+          if (isRecordingRef.current && mediaRecorderRef.current.state === 'recording') {
+            try {
+              mediaRecorderRef.current.stop();
+              isRecordingRef.current = false;
+            } catch (error) {
+              console.warn('Error stopping existing recording:', error);
+            }
+          }
+
+          // Set up new recording
+          mediaRecorderRef.current.ondataavailable = (e) => chunks.push(e.data);
+          mediaRecorderRef.current.onstop = () => {
+            resolve(new Blob(chunks, { type: 'audio/webm' }));
+            isRecordingRef.current = false;
+          };
+
+          // Start recording
+          try {
+            mediaRecorderRef.current.start();
+            isRecordingRef.current = true;
+
+            // Stop after 100ms
+            setTimeout(() => {
+              if (mediaRecorderRef.current?.state === 'recording') {
+                try {
+                  mediaRecorderRef.current.stop();
+                } catch (error) {
+                  console.warn('Error stopping recording:', error);
+                }
+              }
+            }, 100);
+          } catch (error) {
+            console.warn('Error starting recording:', error);
+            resolve(new Blob([], { type: 'audio/webm' }));
+          }
         });
 
-        // Send frame to backend
+        // Send frame to backend via WebSocket
         await apiService.sendFrame({
           video: videoBlob,
           audio: audioBlob,
           timestamp: Date.now(),
         });
+
       } catch (error) {
         console.error('Frame capture error:', error);
       }
@@ -140,15 +196,25 @@ export const WebcamCapture = ({ isActive, onError }: WebcamCaptureProps) => {
     }
 
     // Stop media recorder
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+    if (mediaRecorderRef.current) {
+      try {
+        if (mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+        }
+      } catch (error) {
+        console.warn('Error stopping MediaRecorder:', error);
+      }
       mediaRecorderRef.current = null;
     }
+    isRecordingRef.current = false;
 
     // Clear video source
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+
+    // Disconnect WebSocket
+    apiService.disconnect();
 
     setIsInitialized(false);
   };

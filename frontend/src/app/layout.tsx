@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "NeuroLens - AI-Powered Vision Assistant",
-  description: "Real-time visual feedback through AI-powered object detection and voice assistance.",
+  description: "An AI-powered vision assistant that helps people with visual impairments navigate the world.",
 };
 
 export default function RootLayout({
@@ -16,8 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="transition-colors duration-200">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body 
+        className={`${inter.className} min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 ease-in-out`}
+        style={{ colorScheme: 'light dark' }}
+      >
         <ThemeProvider>
           {children}
         </ThemeProvider>

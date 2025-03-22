@@ -1,21 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import api
+from .config import settings
 
-app = FastAPI()
+app = FastAPI(
+    title="NeuroLens API",
+    description="AI-Powered Vision Assistant API",
+    version="1.0.0"
+)
 
-# Allow frontend to communicate (adjust as needed)
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Use specific domains in prod
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Route registration
-app.include_router(api.router, prefix="/api")
-
 @app.get("/")
 async def root():
-    return {"message": "Backend is running 🚀"}
+    return {"message": "Welcome to NeuroLens API"}

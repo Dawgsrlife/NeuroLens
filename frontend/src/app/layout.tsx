@@ -18,11 +18,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body 
-        className={`${inter.className} min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 ease-in-out`}
+        className={`${inter.className} min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
         style={{ colorScheme: 'light dark' }}
       >
         <ThemeProvider>
-          {children}
+          <div className="transition-colors duration-300 ease-in-out">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

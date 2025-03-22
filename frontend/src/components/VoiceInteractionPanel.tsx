@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { apiService } from "@/services/api";
 import { ProcessedFrame } from "@/types/api";
+import { MicrophoneIcon, StopIcon } from "@heroicons/react/24/solid";
 
 interface VoiceInteractionPanelProps {
   className?: string;
@@ -13,8 +14,10 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
   const [transcript, setTranscript] = useState("");
   const [feedback, setFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Define handleMessage at the component level
   const handleMessage = (data: ProcessedFrame) => {
@@ -54,17 +57,40 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+
+      // Clear any active timers
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
   }, []);
+
+  // Timer for recording duration
+  useEffect(() => {
+    if (isListening) {
+      setRecordingDuration(0);
+      timerRef.current = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isListening]);
 
   const startListening = async () => {
     try {
       setIsListening(true);
-      setIsLoading(true);
+      setTranscript("");
+      audioChunksRef.current = [];
 
       // Record audio using browser APIs
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
@@ -78,9 +104,9 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
         });
 
         try {
+          setIsLoading(true);
           // Send the audio to the backend
           const response = await apiService.sendAudio(audioBlob);
-          setIsLoading(false);
 
           // Handle the response using the component-level handleMessage
           if (response) {
@@ -88,29 +114,18 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
           }
         } catch (error) {
           console.error("Error sending audio:", error);
-          setIsLoading(false);
         } finally {
           stream.getTracks().forEach((track) => track.stop());
           setIsListening(false);
+          setIsLoading(false);
         }
       });
 
-      // Start recording
+      // Start recording - no automatic timeout now
       mediaRecorder.start();
-
-      // Record for 5 seconds
-      setTimeout(() => {
-        if (
-          mediaRecorderRef.current &&
-          mediaRecorderRef.current.state !== "inactive"
-        ) {
-          mediaRecorderRef.current.stop();
-        }
-      }, 5000);
     } catch (error) {
       console.error("Error accessing microphone:", error);
       setIsListening(false);
-      setIsLoading(false);
     }
   };
 
@@ -123,6 +138,15 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
     }
   };
 
+  // Format seconds into MM:SS format
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
   return (
     <div
       className={`p-4 bg-white dark:bg-gray-800 rounded-lg shadow ${className}`}
@@ -133,10 +157,10 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           {isListening
-            ? "Listening..."
+            ? `Listening... ${formatTime(recordingDuration)}`
             : isLoading
             ? "Processing..."
-            : "Press the button to speak"}
+            : "Press the button and speak"}
         </p>
       </div>
 
@@ -152,23 +176,59 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
         </div>
       )}
 
-      <button
-        onClick={isListening ? stopListening : startListening}
-        disabled={isLoading}
-        className={`px-4 py-2 rounded-full ${
-          isListening
-            ? "bg-red-500 animate-pulse text-white"
-            : isLoading
-            ? "bg-gray-400 text-white cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 text-white"
-        }`}
-      >
-        {isListening
-          ? "Stop Listening"
-          : isLoading
-          ? "Processing..."
-          : "Press to Speak"}
-      </button>
+      <div className="flex space-x-2">
+        {!isListening ? (
+          <button
+            onClick={startListening}
+            disabled={isLoading}
+            className={`flex items-center justify-center px-4 py-2 rounded-full space-x-2 ${
+              isLoading
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
+            aria-label="Start recording"
+          >
+            <MicrophoneIcon className="h-5 w-5" />
+            <span>{isLoading ? "Processing..." : "Press to Speak"}</span>
+          </button>
+        ) : (
+          <button
+            onClick={stopListening}
+            className="flex items-center justify-center px-4 py-2 rounded-full space-x-2 bg-red-500 hover:bg-red-600 text-white animate-pulse"
+            aria-label="Stop recording"
+          >
+            <StopIcon className="h-5 w-5" />
+            <span>Stop Recording</span>
+          </button>
+        )}
+      </div>
+
+      {isListening && (
+        <div className="mt-4 flex justify-center">
+          <div className="flex space-x-1">
+            <div
+              className="w-2 h-8 bg-blue-500 rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            ></div>
+            <div
+              className="w-2 h-8 bg-blue-500 rounded-full animate-bounce"
+              style={{ animationDelay: "100ms" }}
+            ></div>
+            <div
+              className="w-2 h-8 bg-blue-500 rounded-full animate-bounce"
+              style={{ animationDelay: "200ms" }}
+            ></div>
+            <div
+              className="w-2 h-8 bg-blue-500 rounded-full animate-bounce"
+              style={{ animationDelay: "300ms" }}
+            ></div>
+            <div
+              className="w-2 h-8 bg-blue-500 rounded-full animate-bounce"
+              style={{ animationDelay: "400ms" }}
+            ></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

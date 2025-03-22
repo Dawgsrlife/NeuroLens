@@ -20,8 +20,8 @@ export const ThemeToggle = () => {
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       className={`p-2 rounded-full transition-colors ${
         resolvedTheme === 'dark' 
-          ? 'hover:bg-gray-800' 
-          : 'hover:bg-gray-100'
+          ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
+          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
       }`}
       aria-label="Toggle theme"
     >
@@ -34,7 +34,7 @@ export const ThemeToggle = () => {
             exit={{ rotate: 180, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <MoonIcon className="w-6 h-6 text-gray-300" />
+            <MoonIcon className="w-6 h-6" />
           </motion.div>
         ) : (
           <motion.div
@@ -44,7 +44,7 @@ export const ThemeToggle = () => {
             exit={{ rotate: 180, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <SunIcon className="w-6 h-6 text-gray-600" />
+            <SunIcon className="w-6 h-6" />
           </motion.div>
         )}
       </AnimatePresence>

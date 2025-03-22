@@ -106,9 +106,9 @@ export default function Home() {
           <div className="flex items-center space-x-4">
             <Link 
               href="/about" 
-              className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+              className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
             >
-              About
+              <InformationCircleIcon className="h-5 w-5" />
             </Link>
             <Link 
               href="/settings" 

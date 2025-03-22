@@ -15,7 +15,7 @@ import {
   Cog6ToothIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "next/link";
+import Link from "next/link";
 import { StatusCard } from "@/components/StatusCard";
 import { FeedbackCard } from "@/components/FeedbackCard";
 

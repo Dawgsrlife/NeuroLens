@@ -18,7 +18,11 @@ export const ThemeToggle = () => {
   return (
     <button
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className={`p-2 rounded-full transition-colors ${
+        resolvedTheme === 'dark'
+          ? 'text-gray-300 hover:text-white hover:bg-gray-800'
+          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+      }`}
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait">

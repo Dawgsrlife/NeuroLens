@@ -84,119 +84,104 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Header */}
-      <AnimatedContainer
-        variant="slide"
-        direction="down"
-        className={`fixed top-0 left-0 right-0 z-50 ${isDark ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-md border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className={`fixed top-0 w-full ${isDark ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} z-50`}
       >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/settings"
-              className={`p-2 rounded-full ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-8">
+            <Logo />
+            <Link 
+              href="/about" 
+              className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
             >
-              <Cog6ToothIcon className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
+              About
             </Link>
-            <Link
-              href="/about"
-              className={`p-2 rounded-full ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link 
+              href="/settings" 
+              className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
             >
-              <InformationCircleIcon className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />
+              <Cog6ToothIcon className="h-5 w-5" />
             </Link>
             <ThemeToggle />
           </div>
-        </div>
-      </AnimatedContainer>
+        </nav>
+      </motion.header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-48 pb-16">
-        <div className={`absolute inset-0 bg-gradient-to-b ${isDark ? 'from-gray-900 to-gray-800' : 'from-blue-50 to-white'} -z-10`} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-6"
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <div className={`absolute inset-0 bg-gradient-to-b ${isDark ? 'from-gray-900 via-gray-800 to-gray-900' : 'from-white via-gray-50 to-white'}`} />
+        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
+          <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>
+            AI-Powered Vision Assistant
+          </h1>
+          <p className={`text-xl sm:text-2xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto mb-8`}>
+            Empowering independence through real-time object detection and voice feedback
+          </p>
+          <button
+            onClick={toggleAssistant}
+            className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
+              isAssistantActive
+                ? `${isDark ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
+                : `${isDark ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
+            }`}
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className={`text-4xl sm:text-5xl md:text-6xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
-            >
-              AI-Powered Vision Assistant
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className={`text-xl sm:text-2xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto`}
-            >
-              Empowering independence through real-time object detection and
-              voice feedback
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mt-8"
-            >
-              <button
-                onClick={toggleAssistant}
-                className={`px-6 py-3 ${isDark ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg font-medium transition-colors`}
-              >
-                {isAssistantActive ? "Stop Assistant" : "Start Assistant"}
-              </button>
-            </motion.div>
-          </motion.div>
+            {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
+          </button>
         </div>
       </section>
 
       {/* Main Content */}
-      <main ref={mainContentRef} className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
-        <AnimatedContainer delay={0.2} className="text-center mb-12">
-          <h1 className={`text-4xl sm:text-5xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
-            NeuroLens
-          </h1>
-          <p className={`text-xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-            Experience the world through advanced AI vision technology
-          </p>
-        </AnimatedContainer>
-
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Webcam Feed */}
-          <AnimatedContainer delay={0.4} className="relative aspect-video rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-            <WebcamCapture
-              isActive={isAssistantActive}
-              onError={setError}
-              onFrameProcessed={handleFrameProcessed}
-            />
+      <main ref={mainContentRef} className={`${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <AnimatedContainer delay={0.4}>
+            <div className="text-center mb-12">
+              <h2 className={`text-3xl sm:text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
+                NeuroLens
+              </h2>
+              <p className={`text-xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
+                Experience the world through advanced AI vision technology
+              </p>
+            </div>
           </AnimatedContainer>
 
-          {/* Status Cards */}
-          <div className="space-y-6">
-            <StatusCard isActive={isAssistantActive} />
-            <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
-            <VoiceInteractionPanel />
-          </div>
-        </div>
+          <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Webcam Feed */}
+            <AnimatedContainer delay={0.4} className="relative aspect-video rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+              <WebcamCapture
+                isActive={isAssistantActive}
+                onError={setError}
+                onFrameProcessed={handleFrameProcessed}
+              />
+            </AnimatedContainer>
 
-        {/* Start/Stop Button */}
-        <AnimatedContainer delay={0.6} className="mt-8">
-          <button
-            onClick={toggleAssistant}
-            className={`px-8 py-4 rounded-full text-lg font-semibold transition-all duration-200 ${
-              isAssistantActive
-                ? `${isDark ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
-                : `${isDark ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
-            } shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
-          >
-            {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
-          </button>
-        </AnimatedContainer>
+            {/* Status Cards */}
+            <div className="space-y-6">
+              <StatusCard isActive={isAssistantActive} />
+              <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
+              <VoiceInteractionPanel />
+            </div>
+          </div>
+
+          {/* Start/Stop Button */}
+          <AnimatedContainer delay={0.6} className="mt-8">
+            <button
+              onClick={toggleAssistant}
+              className={`px-8 py-4 rounded-full text-lg font-semibold transition-all duration-200 ${
+                isAssistantActive
+                  ? `${isDark ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
+                  : `${isDark ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
+              } shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
+            >
+              {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
+            </button>
+          </AnimatedContainer>
+        </div>
       </main>
 
       {/* Footer */}

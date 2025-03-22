@@ -92,16 +92,16 @@ export default function Home() {
         className={`fixed top-0 w-full ${isDark ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} z-50`}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center">
             <Logo />
+          </div>
+          <div className="flex items-center space-x-4">
             <Link 
               href="/about" 
               className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
             >
               About
             </Link>
-          </div>
-          <div className="flex items-center space-x-4">
             <Link 
               href="/settings" 
               className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
@@ -117,29 +117,42 @@ export default function Home() {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-b ${isDark ? 'from-gray-900 via-gray-800 to-gray-900' : 'from-white via-gray-50 to-white'}`} />
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
-          <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className={`text-4xl sm:text-5xl md:text-6xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}
+          >
             AI-Powered Vision Assistant
-          </h1>
-          <p className={`text-xl sm:text-2xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto mb-8`}>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className={`text-xl sm:text-2xl ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-3xl mx-auto mb-8`}
+          >
             Empowering independence through real-time object detection and voice feedback
-          </p>
-          <button
+          </motion.p>
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
             onClick={toggleAssistant}
             className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
-              isAssistantActive
-                ? `${isDark ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
-                : `${isDark ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
+              isDark 
+                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
             {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
-          </button>
+          </motion.button>
         </div>
       </section>
 
       {/* Main Content */}
-      <main ref={mainContentRef} className={`${isDark ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <AnimatedContainer delay={0.4}>
+      <main ref={mainContentRef} className={`${isDark ? 'bg-gray-900' : 'bg-white'} min-h-screen py-12 px-4 sm:px-6 lg:px-8`}>
+        <div className="max-w-7xl mx-auto">
+          <AnimatedContainer delay={0.6}>
             <div className="text-center mb-12">
               <h2 className={`text-3xl sm:text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
                 NeuroLens

@@ -2,4 +2,16 @@ fastapi==0.109.0
 uvicorn==0.27.0
 python-dotenv==1.0.0
 pydantic==2.6.1
-pydantic-settings==2.1.0
+pydantic-settings==2.8.0
+websockets==11.0.3
+python-multipart==0.0.6
+openai==1.5.0
+openai-agents[voice]==0.0.6
+opencv-python==4.8.1.78
+numpy==1.25.2
+pillow==10.0.1
+python-jose==3.3.0
+pytesseract==0.3.10
+sounddevice==0.4.6
+scipy==1.11.3
+aiofiles==23.2.1

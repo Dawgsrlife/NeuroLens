@@ -6,3 +6,4 @@
 /backend/env/
 /backend/.env
 /backend/app/.env
+.env

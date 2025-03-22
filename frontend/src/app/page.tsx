@@ -111,12 +111,18 @@ export default function Home() {
       toggleAssistant();
     };
 
+    const handleToggleSettings = () => {
+      setIsSettingsOpen(prev => !prev);
+    };
+
     window.addEventListener('toggleRecording', handleToggleRecording);
     window.addEventListener('toggleWebcam', handleToggleWebcam);
+    window.addEventListener('toggleSettings', handleToggleSettings);
     
     return () => {
       window.removeEventListener('toggleRecording', handleToggleRecording);
       window.removeEventListener('toggleWebcam', handleToggleWebcam);
+      window.removeEventListener('toggleSettings', handleToggleSettings);
     };
   }, [isRecording]);
 
@@ -154,12 +160,12 @@ export default function Home() {
             >
               <InformationCircleIcon className="h-5 w-5" />
             </Link>
-            <Link 
-              href="/settings" 
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
               className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
             >
               <Cog6ToothIcon className="h-5 w-5" />
-            </Link>
+            </button>
             <ThemeToggle />
           </div>
         </nav>

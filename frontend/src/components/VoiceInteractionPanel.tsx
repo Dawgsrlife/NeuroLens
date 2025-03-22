@@ -125,6 +125,7 @@ export const VoiceInteractionPanel: React.FC<VoiceInteractionPanelProps> = ({
       mediaRecorder.start();
     } catch (error) {
       console.error("Error accessing microphone:", error);
+      setFeedback("Please allow microphone access in your browser settings.");
       setIsListening(false);
     }
   };

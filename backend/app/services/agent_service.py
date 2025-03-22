@@ -145,8 +145,9 @@ class AgentService:
         
         return response, voice_feedback
     
+    @staticmethod
     @function_tool
-    async def _describe_current_scene(self, ctx: RunContextWrapper[AgentContext]) -> str:
+    async def _describe_current_scene(ctx: RunContextWrapper[AgentContext]) -> str:
         """
         Describe the current scene in detail, focusing on the overall environment.
         """
@@ -164,8 +165,9 @@ class AgentService:
             logger.error(f"Error describing scene: {str(e)}")
             return "I'm having trouble processing the visual information at the moment."
     
+    @staticmethod
     @function_tool
-    async def _identify_objects(self, ctx: RunContextWrapper[AgentContext]) -> str:
+    async def _identify_objects(ctx: RunContextWrapper[AgentContext]) -> str:
         """
         Identify and list the key objects visible in the current scene.
         """
@@ -193,8 +195,9 @@ class AgentService:
             logger.error(f"Error identifying objects: {str(e)}")
             return "I'm having trouble identifying objects at the moment."
     
+    @staticmethod
     @function_tool
-    async def _read_text_in_scene(self, ctx: RunContextWrapper[AgentContext]) -> str:
+    async def _read_text_in_scene(ctx: RunContextWrapper[AgentContext]) -> str:
         """
         Read and report any text visible in the current scene, excluding sensitive information.
         """
@@ -230,8 +233,9 @@ class AgentService:
             logger.error(f"Error reading text: {str(e)}")
             return "I'm having trouble reading text at the moment."
     
+    @staticmethod
     @function_tool
-    async def _check_for_hazards(self, ctx: RunContextWrapper[AgentContext]) -> str:
+    async def _check_for_hazards(ctx: RunContextWrapper[AgentContext]) -> str:
         """
         Check for any potential hazards or obstacles in the current scene.
         """
@@ -257,8 +261,9 @@ class AgentService:
             logger.error(f"Error checking for hazards: {str(e)}")
             return "I'm having trouble assessing potential hazards at the moment."
     
+    @staticmethod
     @function_tool
-    async def _identify_currency(self, ctx: RunContextWrapper[AgentContext]) -> str:
+    async def _identify_currency(ctx: RunContextWrapper[AgentContext]) -> str:
         """
         Identify and describe any currency or payment cards visible in the scene.
         """
@@ -293,8 +298,9 @@ class AgentService:
             logger.error(f"Error identifying currency: {str(e)}")
             return "I'm having trouble identifying any currency or payment cards at the moment."
     
+    @staticmethod
     @function_tool
-    async def _answer_from_memory(self, ctx: RunContextWrapper[AgentContext], question: str) -> str:
+    async def _answer_from_memory(ctx: RunContextWrapper[AgentContext], question: str) -> str:
         """
         Answer a question based on the conversation history and memory.
         

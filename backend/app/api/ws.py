@@ -102,6 +102,7 @@ class ConnectionManager:
         """
         Process audio from the client
         """
+        logger.info(f"Received audio data of size: {len(audio_data)} bytes")
         try:
             # Transcribe the audio
             transcription = await self.speech_service.transcribe_audio(audio_data)
@@ -137,7 +138,7 @@ class ConnectionManager:
                         "timestamp": voice_feedback.timestamp
                     }
                 ],
-                "voiceFeedback": voice_feedback.dict() if voice_feedback else None
+                "voiceFeedback": voice_feedback.model_dump() if voice_feedback else None
             }
             
             await self.send_message(connection_id, response_message)
@@ -186,7 +187,7 @@ class ConnectionManager:
                         "timestamp": voice_feedback.timestamp
                     }
                 ],
-                "voiceFeedback": voice_feedback.dict() if voice_feedback else None
+                "voiceFeedback": voice_feedback.model_dump() if voice_feedback else None
             }
             
             await self.send_message(connection_id, response_message)

@@ -231,6 +231,7 @@ class ApiService {
   }
 
   async sendAudio(audioBlob: Blob): Promise<ProcessedFrame | null> {
+    console.log("Sending audio blob of size:", audioBlob.size);
     // Similar implementation to sendFrame, but for audio-only data
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return null;

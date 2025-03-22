@@ -100,7 +100,11 @@ export default function Home() {
   useEffect(() => {
     const handleToggleRecording = () => {
       setIsRecording(prev => !prev);
-      // TODO: Implement actual recording logic
+      // Create and dispatch a custom event that VoiceInteractionPanel will listen for
+      const event = new CustomEvent('toggleRecording', {
+        detail: { isRecording: !isRecording }
+      });
+      window.dispatchEvent(event);
     };
 
     const handleToggleWebcam = () => {
@@ -114,7 +118,7 @@ export default function Home() {
       window.removeEventListener('toggleRecording', handleToggleRecording);
       window.removeEventListener('toggleWebcam', handleToggleWebcam);
     };
-  }, []);
+  }, [isRecording]);
 
   const handleFrameProcessed = (frame: any) => {
     // Handle processed frame data

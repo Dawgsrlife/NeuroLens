@@ -57,6 +57,17 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       },
     });
 
+    // Listen for recording toggle events
+    const handleToggleRecording = (event: CustomEvent) => {
+      if (event.detail.isRecording) {
+        startListening();
+      } else {
+        stopListening();
+      }
+    };
+
+    window.addEventListener('toggleRecording', handleToggleRecording as EventListener);
+    
     return () => {
       // Stop any ongoing speech when the component unmounts
       if ("speechSynthesis" in window) {
@@ -67,6 +78,9 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+
+      // Remove event listener
+      window.removeEventListener('toggleRecording', handleToggleRecording as EventListener);
     };
   }, []);
 

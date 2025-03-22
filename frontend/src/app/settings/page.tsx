@@ -7,21 +7,25 @@ import { AnimatedContainer } from '@/components/ui/AnimatedContainer';
 import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
+import { useHotkeys } from '@/hooks/useHotkeys';
 
 export default function Settings() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const hotkeys = useHotkeys();
 
   // Handle ESC key to return to home
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        // Save current scroll position before navigating
+        localStorage.setItem('homePageScrollPosition', window.scrollY.toString());
         router.push('/');
       }
       
-      // Open About Page (Cmd/Ctrl + A)
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+      // Open About Page (Cmd/Ctrl + I)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'i') {
         event.preventDefault();
         router.push('/about');
       }
@@ -31,6 +35,28 @@ export default function Settings() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [router]);
 
+  // Save scroll position before navigating away
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.setItem('homePageScrollPosition', window.scrollY.toString());
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    const savedScrollPosition = localStorage.getItem('homePageScrollPosition');
+    if (savedScrollPosition) {
+      // Use setTimeout to ensure the DOM is fully rendered
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        localStorage.removeItem('homePageScrollPosition');
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
@@ -39,16 +65,10 @@ export default function Settings() {
         animate={{ y: 0 }}
         className={`fixed top-0 w-full ${isDark ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDark ? 'border-gray-800' : 'border-gray-200'} z-50`}
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center">
           <Link href="/" className={`flex items-center space-x-2 ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}>
             <ArrowLeftIcon className="h-5 w-5" />
             <span>Back to Home</span>
-          </Link>
-          <Link 
-            href="/about" 
-            className={`p-2 rounded-full ${isDark ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} transition-colors`}
-          >
-            <InformationCircleIcon className="h-5 w-5" />
           </Link>
         </nav>
       </motion.header>
@@ -181,25 +201,17 @@ export default function Settings() {
           <AnimatedContainer delay={0.8}>
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm border ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
               <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-6`}>Keyboard Shortcuts</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Start/Stop Assistant</span>
-                  <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                    Space
-                  </kbd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Toggle Settings</span>
-                  <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                    ⌘,
-                  </kbd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Toggle Theme</span>
-                  <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                    ⌘D
-                  </kbd>
-                </div>
+              <div className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                {hotkeys.map((hotkey, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span>{hotkey.description}</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      {hotkey.modifiers?.ctrl && '⌘'}
+                      {hotkey.modifiers?.shift && '⇧'}
+                      {hotkey.key.toUpperCase()}
+                    </kbd>
+                  </div>
+                ))}
               </div>
             </div>
           </AnimatedContainer>

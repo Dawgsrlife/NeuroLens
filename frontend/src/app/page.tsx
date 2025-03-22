@@ -20,6 +20,7 @@ import Link from "next/link";
 import { StatusCard } from "@/components/StatusCard";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { useTheme } from 'next-themes';
+import { useHotkeys } from '@/hooks/useHotkeys';
 
 export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -36,10 +37,31 @@ export default function Home() {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = mounted ? resolvedTheme === 'dark' : false;
+  const [isRecording, setIsRecording] = useState(false);
+  const hotkeys = useHotkeys(true);
 
-  // Handle mounted state
+  // Handle mounted state and scroll restoration
   useEffect(() => {
     setMounted(true);
+    
+    // Restore scroll position if it exists
+    const savedScrollPosition = localStorage.getItem('homePageScrollPosition');
+    if (savedScrollPosition) {
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition));
+        localStorage.removeItem('homePageScrollPosition'); // Clear the saved position
+      }, 100);
+    }
+  }, []);
+
+  // Save scroll position before navigating away
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.setItem('homePageScrollPosition', window.scrollY.toString());
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   const toggleAssistant = () => {
@@ -74,37 +96,25 @@ export default function Home() {
     };
   }, []);
 
-  // Handle keyboard shortcuts
+  // Handle recording toggle from hotkey
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Toggle Assistant (Space)
-      if (event.code === "Space") {
-        event.preventDefault();
-        toggleAssistant();
-      }
-      
-      // Open About Page (Cmd/Ctrl + A)
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
-        event.preventDefault();
-        window.location.href = '/about';
-      }
-      
-      // Open Settings (Cmd/Ctrl + ,)
-      if ((event.metaKey || event.ctrlKey) && event.key === ',') {
-        event.preventDefault();
-        window.location.href = '/settings';
-      }
-      
-      // Toggle Theme (Cmd/Ctrl + D)
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
-        event.preventDefault();
-        setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-      }
+    const handleToggleRecording = () => {
+      setIsRecording(prev => !prev);
+      // TODO: Implement actual recording logic
     };
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [resolvedTheme, setTheme, toggleAssistant]);
+    const handleToggleWebcam = () => {
+      toggleAssistant();
+    };
+
+    window.addEventListener('toggleRecording', handleToggleRecording);
+    window.addEventListener('toggleWebcam', handleToggleWebcam);
+    
+    return () => {
+      window.removeEventListener('toggleRecording', handleToggleRecording);
+      window.removeEventListener('toggleWebcam', handleToggleWebcam);
+    };
+  }, []);
 
   const handleFrameProcessed = (frame: any) => {
     // Handle processed frame data
@@ -220,51 +230,6 @@ export default function Home() {
             <div className="space-y-6">
               <StatusCard isActive={isAssistantActive} />
               <VoiceInteractionPanel />
-              {/* Hotkeys Display */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
-                className={`p-6 rounded-xl shadow-sm border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-              >
-                <div className="flex items-center space-x-3 mb-4">
-                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Keyboard Shortcuts
-                  </h3>
-                </div>
-                <div className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  <div className="flex items-center justify-between">
-                    <span>Toggle Assistant</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      Space
-                    </kbd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Open About Page</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      ⌘A
-                    </kbd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Open Settings</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      ⌘,
-                    </kbd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Toggle Theme</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      ⌘D
-                    </kbd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Return to Home</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      Esc
-                    </kbd>
-                  </div>
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>

@@ -5,205 +5,178 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedContainer } from '@/components/ui/AnimatedContainer';
 import { SettingsModal } from '@/components/ui/SettingsModal';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { WebcamCapture } from '@/components/WebcamCapture';
+import { CaptionDisplay } from '@/components/CaptionDisplay';
+import { VoiceFeedback } from '@/components/VoiceFeedback';
+import { apiService } from '@/services/api';
+import { Caption, VoiceFeedback as VoiceFeedbackType } from '@/types/api';
 
 export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAssistantActive, setIsAssistantActive] = useState(false);
+  const [captions, setCaptions] = useState<Caption[]>([]);
+  const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    apiService.initializeWebSocket({
+      onMessage: (data) => {
+        if (data.captions) {
+          setCaptions((prev) => [...prev, ...data.captions]);
+        }
+        if (data.voiceFeedback) {
+          setVoiceFeedback(data.voiceFeedback);
+        }
+      },
+      onError: (error) => {
+        setError(error);
+      },
+    });
+
+    return () => {
+      apiService.disconnect();
+    };
+  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        setIsAssistantActive(!isAssistantActive);
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        setIsAssistantActive((prev) => !prev);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isAssistantActive]);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header/Navigation */}
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      {/* Header */}
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 z-50"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800"
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <AnimatedContainer delay={0.2} className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">🧠</span>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">NeuroLens</span>
-          </AnimatedContainer>
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            NeuroLens
+          </h1>
           <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-4 py-2 rounded-full transition-colors ${
-                isAssistantActive
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
-              onClick={() => setIsAssistantActive(!isAssistantActive)}
-            >
-              {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
-            </motion.button>
             <ThemeToggle />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            <button
               onClick={() => setIsSettingsOpen(true)}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <span className="sr-only">Settings</span>
-              ⚙️
-            </motion.button>
+              <svg
+                className="w-6 h-6 text-gray-600 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
           </div>
-        </nav>
+        </div>
       </motion.header>
 
       {/* Main Content */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Hero Section */}
-        <AnimatedContainer delay={0.4} className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            AI-Powered Vision Assistant
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Empowering independence through real-time visual feedback and voice assistance
-          </p>
-        </AnimatedContainer>
-
-        {/* Main Interface */}
+      <main className="container mx-auto px-4 pt-24 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Webcam Feed */}
-          <AnimatedContainer delay={0.6} className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 aspect-video relative overflow-hidden">
-            <motion.div
-              animate={{
-                scale: isAssistantActive ? [1, 1.02, 1] : 1,
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <div className="text-gray-400 dark:text-gray-500 text-center">
-                <div className="text-4xl mb-2">📹</div>
-                <p>Webcam feed will appear here</p>
-              </div>
-            </motion.div>
+          <AnimatedContainer delay={0.2}>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Webcam Feed
+              </h2>
+              <WebcamCapture
+                isActive={isAssistantActive}
+                onError={setError}
+              />
+            </div>
           </AnimatedContainer>
 
-          {/* Status and Feedback */}
-          <div className="space-y-6">
-            {/* Status Card */}
-            <AnimatedContainer delay={0.8}>
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">System Status</h2>
-                <div className="space-y-3">
-                  <motion.div
-                    animate={{
-                      opacity: isAssistantActive ? 1 : 0.5,
-                    }}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-gray-600 dark:text-gray-300">Camera</span>
-                    <span className="text-green-500">●</span>
-                  </motion.div>
-                  <motion.div
-                    animate={{
-                      opacity: isAssistantActive ? 1 : 0.5,
-                    }}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-gray-600 dark:text-gray-300">Voice Assistant</span>
-                    <span className="text-green-500">●</span>
-                  </motion.div>
-                  <motion.div
-                    animate={{
-                      opacity: isAssistantActive ? 1 : 0.5,
-                    }}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-gray-600 dark:text-gray-300">Object Detection</span>
-                    <span className="text-green-500">●</span>
-                  </motion.div>
-                </div>
-              </div>
-            </AnimatedContainer>
-
-            {/* Feedback Card */}
-            <AnimatedContainer delay={1}>
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Real-time Feedback</h2>
-                <div className="h-48 overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                  <AnimatePresence>
-                    {isAssistantActive ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="text-gray-600 dark:text-gray-300"
-                      >
-                        Voice feedback and observations will appear here...
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="text-gray-400 dark:text-gray-500 italic"
-                      >
-                        Assistant is inactive. Press Space or click "Start Assistant" to begin.
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </AnimatedContainer>
-          </div>
+          {/* Captions and Feedback */}
+          <AnimatedContainer delay={0.4}>
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Captions & Feedback
+              </h2>
+              <CaptionDisplay
+                captions={captions}
+                voiceFeedback={voiceFeedback || undefined}
+              />
+            </div>
+          </AnimatedContainer>
         </div>
+
+        {/* Status Bar */}
+        <AnimatedContainer delay={0.6}>
+          <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    isAssistantActive
+                      ? 'bg-green-500'
+                      : 'bg-gray-400'
+                  }`}
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  {isAssistantActive ? 'Assistant Active' : 'Assistant Inactive'}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Press Space to {isAssistantActive ? 'Stop' : 'Start'}
+              </div>
+            </div>
+          </div>
+        </AnimatedContainer>
       </main>
 
-      {/* Footer */}
-      <motion.footer
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <motion.div
-            animate={{
-              opacity: isAssistantActive ? 1 : 0.5,
-            }}
-            className="text-sm text-gray-500 dark:text-gray-400"
-          >
-            Press Space to toggle voice feedback
-          </motion.div>
-          <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              Accessibility
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              Help
-            </motion.button>
-          </div>
-        </div>
-      </motion.footer>
-
       {/* Settings Modal */}
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* Voice Feedback */}
+      {voiceFeedback && (
+        <VoiceFeedback
+          feedback={voiceFeedback}
+          volume={1}
+          rate={1}
+          pitch={1}
+        />
+      )}
+
+      {/* Error Toast */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-4 py-2 rounded-lg shadow-lg"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

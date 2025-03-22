@@ -150,7 +150,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Webcam Feed */}
           <AnimatedContainer variant="scale" className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden aspect-video">
               <WebcamCapture
                 isActive={isAssistantActive}
                 onError={setError}
@@ -159,21 +159,16 @@ export default function Home() {
             </div>
           </AnimatedContainer>
 
-          <div className="space-y-6 h-full">
-            <AnimatedContainer variant="slide" direction="right" delay={0.2}>
-              <StatusCard isActive={isAssistantActive} />
-            </AnimatedContainer>
-            <AnimatedContainer
-              variant="slide"
-              direction="right"
-              delay={0.3}
-              className="h-[calc(100%-6rem)]"
-            >
-              <FeedbackCard
-                feedback={voiceFeedback?.text || "No feedback yet"}
-              />
-            </AnimatedContainer>
-
+          {/* Status and Feedback Cards */}
+          <div className="flex flex-col h-full justify-between">
+            <div className="space-y-6">
+              <AnimatedContainer variant="slide" direction="right" delay={0.2}>
+                <StatusCard isActive={isAssistantActive} />
+              </AnimatedContainer>
+              <AnimatedContainer variant="slide" direction="right" delay={0.3}>
+                <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
+              </AnimatedContainer>
+            </div>
             <AnimatedContainer variant="slide" direction="right" delay={0.4}>
               <VoiceInteractionPanel />
             </AnimatedContainer>

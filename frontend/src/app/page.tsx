@@ -19,17 +19,22 @@ import {
 import Link from "next/link";
 import { StatusCard } from "@/components/StatusCard";
 import { FeedbackCard } from "@/components/FeedbackCard";
+import { useTheme } from 'next-themes';
 
 export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAssistantActive, setIsAssistantActive] = useState(false);
+  const [isWebcamActive, setIsWebcamActive] = useState(false);
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType | null>(
     null
   );
   const [error, setError] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -76,11 +81,14 @@ export default function Home() {
   };
 
   const toggleAssistant = () => {
-    setIsAssistantActive((prev) => !prev);
-    // Add smooth scroll to main content
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setIsAssistantActive(!isAssistantActive);
+    setIsWebcamActive(!isWebcamActive);
+    setIsVoiceActive(!isVoiceActive);
+    setIsProcessing(false);
+    setError(null);
+    
+    // Smooth scroll to main content
+    mainContentRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (

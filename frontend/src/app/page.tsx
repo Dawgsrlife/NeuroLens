@@ -34,13 +34,24 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const isDark = mounted ? resolvedTheme === 'dark' : false;
 
   // Handle mounted state
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const toggleAssistant = () => {
+    setIsAssistantActive(prev => !prev);
+    setIsWebcamActive(prev => !prev);
+    setIsVoiceActive(prev => !prev);
+    setIsProcessing(false);
+    setError(null);
+    
+    // Smooth scroll to main content
+    mainContentRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -66,15 +77,34 @@ export default function Home() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      // Toggle Assistant (Space)
       if (event.code === "Space") {
         event.preventDefault();
-        setIsAssistantActive((prev) => !prev);
+        toggleAssistant();
+      }
+      
+      // Open About Page (Cmd/Ctrl + A)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        window.location.href = '/about';
+      }
+      
+      // Open Settings (Cmd/Ctrl + ,)
+      if ((event.metaKey || event.ctrlKey) && event.key === ',') {
+        event.preventDefault();
+        window.location.href = '/settings';
+      }
+      
+      // Toggle Theme (Cmd/Ctrl + D)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
+  }, [resolvedTheme, setTheme, toggleAssistant]);
 
   const handleFrameProcessed = (frame: any) => {
     // Handle processed frame data
@@ -84,17 +114,6 @@ export default function Home() {
     if (frame.voiceFeedback) {
       setVoiceFeedback(frame.voiceFeedback);
     }
-  };
-
-  const toggleAssistant = () => {
-    setIsAssistantActive(!isAssistantActive);
-    setIsWebcamActive(!isWebcamActive);
-    setIsVoiceActive(!isVoiceActive);
-    setIsProcessing(false);
-    setError(null);
-    
-    // Smooth scroll to main content
-    mainContentRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Don't render anything until mounted to prevent theme flash
@@ -183,36 +202,71 @@ export default function Home() {
           </AnimatedContainer>
 
           <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Webcam Feed */}
-            <AnimatedContainer delay={0.4} className="relative aspect-video rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-              <WebcamCapture
-                isActive={isAssistantActive}
-                onError={setError}
-                onFrameProcessed={handleFrameProcessed}
-              />
-            </AnimatedContainer>
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Webcam Feed */}
+              <AnimatedContainer delay={0.4} className="relative aspect-video rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                <WebcamCapture
+                  isActive={isAssistantActive}
+                  onError={setError}
+                  onFrameProcessed={handleFrameProcessed}
+                />
+              </AnimatedContainer>
+              {/* Voice Feedback Card */}
+              <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
+            </div>
 
-            {/* Status Cards */}
+            {/* Right Column */}
             <div className="space-y-6">
               <StatusCard isActive={isAssistantActive} />
-              <FeedbackCard feedback={voiceFeedback?.text || 'No feedback yet'} />
               <VoiceInteractionPanel />
+              {/* Hotkeys Display */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                className={`p-6 rounded-xl shadow-sm border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+              >
+                <div className="flex items-center space-x-3 mb-4">
+                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Keyboard Shortcuts
+                  </h3>
+                </div>
+                <div className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <div className="flex items-center justify-between">
+                    <span>Toggle Assistant</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      Space
+                    </kbd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Open About Page</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      ⌘A
+                    </kbd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Open Settings</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      ⌘,
+                    </kbd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Toggle Theme</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      ⌘D
+                    </kbd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Return to Home</span>
+                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                      Esc
+                    </kbd>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
-
-          {/* Start/Stop Button */}
-          <AnimatedContainer delay={0.6} className="mt-8">
-            <button
-              onClick={toggleAssistant}
-              className={`px-8 py-4 rounded-full text-lg font-semibold transition-all duration-200 ${
-                isAssistantActive
-                  ? `${isDark ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
-                  : `${isDark ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
-              } shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}
-            >
-              {isAssistantActive ? 'Stop Assistant' : 'Start Assistant'}
-            </button>
-          </AnimatedContainer>
         </div>
       </main>
 

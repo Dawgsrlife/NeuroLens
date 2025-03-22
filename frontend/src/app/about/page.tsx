@@ -110,7 +110,13 @@ export default function About() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`} />
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold ${
+                      isDark 
+                        ? 'bg-blue-500/20 text-blue-400' 
+                        : 'bg-blue-100 text-blue-600'
+                    }`}>
+                      AHM
+                    </div>
                     <div>
                       <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Alexander He Meng</h3>
                       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>UI/UX Designer</p>
@@ -119,7 +125,13 @@ export default function About() {
                 </div>
                 <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`} />
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold ${
+                      isDark 
+                        ? 'bg-purple-500/20 text-purple-400' 
+                        : 'bg-purple-100 text-purple-600'
+                    }`}>
+                      MP
+                    </div>
                     <div>
                       <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Mahan Pouromidi</h3>
                       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>AI Engineer</p>

@@ -5,13 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import json
 from openai import OpenAI
 
-from agents import (
-    Agent, 
-    Runner, 
-    function_tool,
-    RunContextWrapper,
-    trace
-)
+from agents import Agent, Runner, function_tool, RunContextWrapper, trace, ModelSettings
 
 from app.config import settings
 from app.models.schemas import (
@@ -107,7 +101,7 @@ class AgentService:
                 self._answer_from_memory
             ],
             model=settings.AGENT_MODEL,
-            model_settings={"temperature": settings.AGENT_TEMPERATURE}
+            model_settings=ModelSettings(temperature=settings.AGENT_TEMPERATURE)  # Use ModelSettings class instead of a dictionary
         )
     
     async def process_query(self, query: str, current_frame: ProcessedFrame) -> Tuple[str, VoiceFeedback]:

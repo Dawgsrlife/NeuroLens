@@ -84,21 +84,21 @@ class ApiService {
     if (!this.callbacks) return;
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = this.reconnectTimeout * Math.pow(2, this.reconnectAttempts - 1);
-      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms...`);
-      
-      setTimeout(() => {
-        if (!this.isConnecting) {
-          this.initializeWebSocket(this.callbacks!);
-        }
-      }, delay);
+        this.reconnectAttempts++;
+        const delay = this.reconnectTimeout * Math.pow(1.5, this.reconnectAttempts - 1); // Exponential backoff
+        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms...`);
+        
+        setTimeout(() => {
+            if (!this.isConnecting && this.callbacks) {
+                this.initializeWebSocket(this.callbacks);
+            }
+        }, delay);
     } else {
-      console.error('Max reconnection attempts reached');
-      this.callbacks.onError('Failed to connect to server. Please refresh the page.');
-      this.disconnect();
+        console.error('Max reconnection attempts reached');
+        this.callbacks.onError('Connection lost. Please refresh the page to reconnect.');
+        this.disconnect();
     }
-  }
+}
 
   private async processFrameQueue(): Promise<void> {
     if (this.isProcessingQueue || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
@@ -197,7 +197,7 @@ class ApiService {
         const timeout = setTimeout(() => {
           this.ws?.removeEventListener('message', handleMessage);
           resolve(null); // Resolve with null instead of rejecting
-        }, 5000); // 5 second timeout
+        }, 1000); // 1 second timeout
         
         // Add the temporary event listener
         this.ws?.addEventListener('message', handleMessage);

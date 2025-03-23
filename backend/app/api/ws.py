@@ -2,8 +2,11 @@ import asyncio
 import json
 import logging
 import uuid
+import time
+import datetime
 from typing import Dict, List, Optional, Any, Callable
 import base64
+from starlette.websockets import WebSocketState
 
 from fastapi import WebSocket, WebSocketDisconnect, Depends, status
 from pydantic import ValidationError
@@ -49,11 +52,25 @@ class ConnectionManager:
             del self.tasks[connection_id]
     
     async def send_message(self, connection_id: str, message: dict) -> None:
-        """
-        Send a message to a specific client
-        """
+        """Send a message to a specific client"""
         if connection_id in self.active_connections:
-            await self.active_connections[connection_id].send_json(message)
+            try:
+                websocket = self.active_connections[connection_id]
+                # Check if the connection is still open
+                if websocket.client_state == WebSocketState.CONNECTED:
+                    await websocket.send_json(message)
+                else:
+                    logger.warning(f"Connection {connection_id} no longer connected")
+                    await self.disconnect(connection_id)
+            except RuntimeError as e:
+                if "close message" in str(e):
+                    logger.warning(f"Connection {connection_id} already closed, removing")
+                    await self.disconnect(connection_id)
+                else:
+                    logger.error(f"RuntimeError when sending message: {str(e)}")
+            except Exception as e:
+                logger.error(f"Error sending message: {str(e)}")
+                await self.disconnect(connection_id)
     
     async def broadcast(self, message: dict) -> None:
         """
@@ -89,7 +106,7 @@ class ConnectionManager:
                 self.memory_service.add_scene_description(processed_frame.raw_description)
             
             # Send the processed frame back to the client
-            await self.send_message(connection_id, processed_frame.dict())
+            await self.send_message(connection_id, processed_frame.model_dump())
         
         except Exception as e:
             logger.error(f"Error processing video frame: {str(e)}")
@@ -99,10 +116,7 @@ class ConnectionManager:
             await self.send_message(connection_id, error_message)
     
     async def process_audio(self, connection_id: str, audio_data: bytes) -> None:
-        """
-        Process audio from the client
-        """
-        logger.info(f"Received audio data of size: {len(audio_data)} bytes")
+        """Process audio from the client"""
         try:
             # Transcribe the audio
             transcription = await self.speech_service.transcribe_audio(audio_data)
@@ -114,51 +128,70 @@ class ConnectionManager:
             logger.info(f"Transcribed: {transcription}")
             
             # Get the latest frame for context
-            # In a real implementation, you'd want to store frames per connection
-            # This is a simplified approach
             current_frame = ProcessedFrame(
                 captions=[],
                 frame_id=str(uuid.uuid4())
             )
             
             # Process the query with the agent
-            response, voice_feedback = await self.agent_service.process_query(
-                transcription, 
-                current_frame
-            )
-            
-            # Send the response text back to the client
-            response_message = {
-                "captions": [
-                    {
-                        "id": str(uuid.uuid4()),
-                        "text": transcription,
-                        "type": "audio",
+            try:
+                from datetime import datetime  # Add this import at the top of the file
+                
+                response, voice_feedback = await self.agent_service.process_query(
+                    transcription, 
+                    current_frame
+                )
+                
+                # Send the response text back to the client
+                response_message = {
+                    "captions": [
+                        {
+                            "id": str(uuid.uuid4()),
+                            "text": transcription,
+                            "type": "audio",
+                            "priority": "medium",
+                            "timestamp": datetime.now().timestamp()
+                        }
+                    ],
+                    "voiceFeedback": voice_feedback.model_dump() if voice_feedback and hasattr(voice_feedback, 'model_dump') else {
+                        "text": str(response),
                         "priority": "medium",
-                        "timestamp": voice_feedback.timestamp
+                        "timestamp": datetime.now().timestamp()
                     }
-                ],
-                "voiceFeedback": voice_feedback.model_dump() if voice_feedback else None
-            }
-            
-            await self.send_message(connection_id, response_message)
-            
-            # Generate and stream speech response
-            speech_data = await self.speech_service.text_to_speech(response)
-            
-            # In a real implementation, you would stream this back to the client
-            # For now, we'll just log it
-            logger.info(f"Generated {len(speech_data)} bytes of speech data")
-            
-            # You would send this binary data back to the client
-            # For example using a separate binary WebSocket message
-            
+                }
+                
+                await self.send_message(connection_id, response_message)
+                
+            except Exception as e:
+                logger.error(f"Error processing query: {str(e)}", exc_info=True)
+                # Send a fallback response
+                error_message = {
+                    "captions": [
+                        {
+                            "id": str(uuid.uuid4()),
+                            "text": transcription, 
+                            "type": "audio",
+                            "priority": "medium",
+                            "timestamp": datetime.now().timestamp()
+                        }
+                    ],
+                    "voiceFeedback": {
+                        "text": f"I heard you say '{transcription}', but I'm having trouble processing your request right now. Please try again in a moment.",
+                        "priority": "high",
+                        "timestamp": datetime.now().timestamp()
+                    }
+                }
+                await self.send_message(connection_id, error_message)
+                
         except Exception as e:
             logger.error(f"Error processing audio: {str(e)}")
             error_message = {
                 "error": f"Error processing audio: {str(e)}"
             }
-            await self.send_message(connection_id, error_message)
+            try:
+                await self.send_message(connection_id, error_message)
+            except Exception as send_error:
+                logger.error(f"Error sending error message: {str(send_error)}")
     
     async def handle_user_message(self, connection_id: str, message: str) -> None:
         """

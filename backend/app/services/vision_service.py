@@ -14,6 +14,8 @@ import torch
 from app.config import settings
 from app.models.schemas import DetectedObject, DetectedText, Caption, CaptionType, CaptionPriority, ProcessedFrame, VoiceFeedback
 
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
 logger = logging.getLogger(__name__)
 
 class VisionService:

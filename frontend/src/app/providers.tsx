@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ThemeProvider as NextThemeProvider } from 'next-themes';
-import { type ThemeProviderProps } from 'next-themes/dist/types';
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+type ThemeProviderProps = React.ComponentProps<typeof NextThemeProvider>;
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
@@ -11,14 +11,14 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       enableSystem={true}
       disableTransitionOnChange={false}
       storageKey="neurolens-theme"
-      themes={['light', 'dark']}
+      themes={["light", "dark"]}
       value={{
-        light: 'light',
-        dark: 'dark',
+        light: "light",
+        dark: "dark",
       }}
       {...props}
     >
       {children}
     </NextThemeProvider>
   );
-} 
+}

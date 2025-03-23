@@ -8,8 +8,14 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     <NextThemeProvider
       attribute="class"
       defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+      enableSystem={true}
+      disableTransitionOnChange={false}
+      storageKey="neurolens-theme"
+      themes={['light', 'dark']}
+      value={{
+        light: 'light',
+        dark: 'dark',
+      }}
       {...props}
     >
       {children}

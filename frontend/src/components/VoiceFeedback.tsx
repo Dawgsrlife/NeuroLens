@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { VoiceFeedback as VoiceFeedbackType } from "@/types/api";
+import { useEffect, useRef } from 'react';
+import { VoiceFeedback as VoiceFeedbackType } from '@/types/api';
 
 interface VoiceFeedbackProps {
   feedback: VoiceFeedbackType;
@@ -36,8 +36,7 @@ export const VoiceFeedback = ({
     // Set priority-based voice selection
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(
-      (voice) =>
-        voice.name.includes("Google") || voice.name.includes("Microsoft")
+      (voice) => voice.name.includes('Google') || voice.name.includes('Microsoft')
     );
     if (preferredVoice) {
       utterance.voice = preferredVoice;
@@ -45,16 +44,16 @@ export const VoiceFeedback = ({
 
     // Handle speech events
     utterance.onstart = () => {
-      console.log("Speech started");
+      console.log('Speech started');
     };
 
     utterance.onend = () => {
-      console.log("Speech ended");
+      console.log('Speech ended');
       utteranceRef.current = null;
     };
 
     utterance.onerror = (event) => {
-      console.error("Speech error:", event);
+      console.error('Speech error:', event);
       utteranceRef.current = null;
     };
 
@@ -70,4 +69,4 @@ export const VoiceFeedback = ({
   }, [feedback.text, volume, rate, pitch]);
 
   return null; // This is a non-visual component
-};
+}; 

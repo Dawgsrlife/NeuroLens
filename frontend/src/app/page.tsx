@@ -20,9 +20,9 @@ import Link from "next/link";
 import { StatusCard } from "@/components/StatusCard";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { useTheme } from 'next-themes';
-import { useHotkeys } from '@/hooks/useHotkeys';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { useRouter } from 'next/navigation';
+import { useHotkeys } from '@/hooks/useHotkeys';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -39,13 +39,43 @@ export default function Home() {
   const [voiceFeedback, setVoiceFeedback] = useState<VoiceFeedbackType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const hotkeys = useHotkeys(true);
   useScrollPosition();
+  useHotkeys(true); // Enable hotkeys for the main page
 
   // Handle mounted state and theme
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle recording toggle from hotkey
+  useEffect(() => {
+    const handleToggleRecording = () => {
+      setIsRecording(prev => !prev);
+      // Create and dispatch a custom event that VoiceInteractionPanel will listen for
+      const event = new CustomEvent('toggleRecording', {
+        detail: { isRecording: !isRecording }
+      });
+      window.dispatchEvent(event);
+    };
+
+    const handleToggleWebcam = () => {
+      toggleAssistant();
+    };
+
+    const handleToggleSettings = () => {
+      setIsSettingsOpen(true);
+    };
+
+    window.addEventListener('toggleRecording', handleToggleRecording);
+    window.addEventListener('toggleWebcam', handleToggleWebcam);
+    window.addEventListener('toggleSettings', handleToggleSettings);
+    
+    return () => {
+      window.removeEventListener('toggleRecording', handleToggleRecording);
+      window.removeEventListener('toggleWebcam', handleToggleWebcam);
+      window.removeEventListener('toggleSettings', handleToggleSettings);
+    };
+  }, [isRecording]);
 
   const toggleAssistant = () => {
     setIsAssistantActive(prev => !prev);
@@ -78,36 +108,6 @@ export default function Home() {
       apiService.disconnect();
     };
   }, []);
-
-  // Handle recording toggle from hotkey
-  useEffect(() => {
-    const handleToggleRecording = () => {
-      setIsRecording(prev => !prev);
-      // Create and dispatch a custom event that VoiceInteractionPanel will listen for
-      const event = new CustomEvent('toggleRecording', {
-        detail: { isRecording: !isRecording }
-      });
-      window.dispatchEvent(event);
-    };
-
-    const handleToggleWebcam = () => {
-      toggleAssistant();
-    };
-
-    const handleToggleSettings = () => {
-      setIsSettingsOpen(prev => !prev);
-    };
-
-    window.addEventListener('toggleRecording', handleToggleRecording);
-    window.addEventListener('toggleWebcam', handleToggleWebcam);
-    window.addEventListener('toggleSettings', handleToggleSettings);
-    
-    return () => {
-      window.removeEventListener('toggleRecording', handleToggleRecording);
-      window.removeEventListener('toggleWebcam', handleToggleWebcam);
-      window.removeEventListener('toggleSettings', handleToggleSettings);
-    };
-  }, [isRecording]);
 
   const handleFrameProcessed = (frame: any) => {
     // Handle processed frame data

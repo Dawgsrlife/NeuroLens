@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { useSettings, Settings } from "@/contexts/SettingsContext";
+import { useHotkeys } from "@/hooks/useHotkeys";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = mounted ? resolvedTheme === "dark" : false;
+  const hotkeys = useHotkeys(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -342,6 +344,39 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                         </button>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Add Keyboard Shortcuts section at the bottom */}
+                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>Keyboard Shortcuts</h3>
+                  <div className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {hotkeys.map((hotkey, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span>{hotkey.description}</span>
+                        <div className="flex items-center space-x-1">
+                          {hotkey.modifiers?.ctrl && (
+                            <>
+                              <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                                Ctrl
+                              </kbd>
+                              <span className="mx-1">+</span>
+                            </>
+                          )}
+                          {hotkey.modifiers?.shift && (
+                            <>
+                              <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                                Shift
+                              </kbd>
+                              <span className="mx-1">+</span>
+                            </>
+                          )}
+                          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                            {hotkey.key === ' ' ? 'Space' : hotkey.key.toUpperCase()}
+                          </kbd>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </Dialog.Panel>

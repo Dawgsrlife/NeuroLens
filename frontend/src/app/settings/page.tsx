@@ -8,6 +8,7 @@ import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outlin
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useHotkeys } from '@/hooks/useHotkeys';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function Settings() {
   const [mounted, setMounted] = useState(false);
@@ -15,6 +16,7 @@ export default function Settings() {
   const isDark = mounted ? resolvedTheme === 'dark' : false;
   const router = useRouter();
   const hotkeys = useHotkeys(false);
+  const { settings, updateVoiceSettings, updateDetectionSettings, updateAccessibilitySettings } = useSettings();
 
   // Handle mounted state and theme
   useEffect(() => {
@@ -107,6 +109,8 @@ export default function Settings() {
                     type="range"
                     min="0"
                     max="100"
+                    value={settings.voice.volume}
+                    onChange={(e) => updateVoiceSettings({ volume: parseInt(e.target.value) })}
                     className={`w-full h-2 ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg appearance-none cursor-pointer`}
                   />
                 </div>
@@ -114,7 +118,11 @@ export default function Settings() {
                   <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     Voice Style
                   </label>
-                  <select className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}>
+                  <select
+                    value={settings.voice.style}
+                    onChange={(e) => updateVoiceSettings({ style: e.target.value as Settings['voice']['style'] })}
+                    className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                  >
                     <option>Natural</option>
                     <option>Clear</option>
                     <option>Detailed</option>
@@ -128,6 +136,8 @@ export default function Settings() {
                     type="range"
                     min="0"
                     max="100"
+                    value={settings.voice.speechRate}
+                    onChange={(e) => updateVoiceSettings({ speechRate: parseInt(e.target.value) })}
                     className={`w-full h-2 ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg appearance-none cursor-pointer`}
                   />
                 </div>
@@ -148,6 +158,8 @@ export default function Settings() {
                     type="range"
                     min="0"
                     max="100"
+                    value={settings.detection.sensitivity}
+                    onChange={(e) => updateDetectionSettings({ sensitivity: parseInt(e.target.value) })}
                     className={`w-full h-2 ${isDark ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg appearance-none cursor-pointer`}
                   />
                 </div>
@@ -155,7 +167,11 @@ export default function Settings() {
                   <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     Detection Range
                   </label>
-                  <select className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}>
+                  <select
+                    value={settings.detection.range}
+                    onChange={(e) => updateDetectionSettings({ range: e.target.value as Settings['detection']['range'] })}
+                    className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                  >
                     <option>Short (1-3m)</option>
                     <option>Medium (3-5m)</option>
                     <option>Long (5m+)</option>
@@ -165,7 +181,11 @@ export default function Settings() {
                   <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                     Update Frequency
                   </label>
-                  <select className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}>
+                  <select
+                    value={settings.detection.updateFrequency}
+                    onChange={(e) => updateDetectionSettings({ updateFrequency: e.target.value as Settings['detection']['updateFrequency'] })}
+                    className={`w-full rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-white border-gray-300 text-gray-900'} shadow-sm focus:border-blue-500 focus:ring-blue-500`}
+                  >
                     <option>High (100ms)</option>
                     <option>Medium (250ms)</option>
                     <option>Low (500ms)</option>
@@ -184,10 +204,17 @@ export default function Settings() {
                   <label className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     High Contrast Mode
                   </label>
-                  <button className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent ${isDark ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}>
+                  <button
+                    onClick={() => updateAccessibilitySettings({ highContrast: !settings.accessibility.highContrast })}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent ${
+                      settings.accessibility.highContrast ? 'bg-blue-600' : isDark ? 'bg-gray-700' : 'bg-gray-200'
+                    } transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                  >
                     <span className="sr-only">Use high contrast mode</span>
                     <span
-                      className="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        settings.accessibility.highContrast ? 'translate-x-5' : 'translate-x-0'
+                      }`}
                     />
                   </button>
                 </div>
@@ -195,10 +222,17 @@ export default function Settings() {
                   <label className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Screen Reader Optimizations
                   </label>
-                  <button className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent ${isDark ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}>
+                  <button
+                    onClick={() => updateAccessibilitySettings({ screenReaderOptimizations: !settings.accessibility.screenReaderOptimizations })}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent ${
+                      settings.accessibility.screenReaderOptimizations ? 'bg-blue-600' : isDark ? 'bg-gray-700' : 'bg-gray-200'
+                    } transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                  >
                     <span className="sr-only">Enable screen reader optimizations</span>
                     <span
-                      className="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      className={`pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        settings.accessibility.screenReaderOptimizations ? 'translate-x-5' : 'translate-x-0'
+                      }`}
                     />
                   </button>
                 </div>
@@ -214,11 +248,27 @@ export default function Settings() {
                 {hotkeys.map((hotkey, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <span>{hotkey.description}</span>
-                    <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
-                      {hotkey.modifiers?.ctrl && '⌘'}
-                      {hotkey.modifiers?.shift && '⇧'}
-                      {hotkey.key.toUpperCase()}
-                    </kbd>
+                    <div className="flex items-center space-x-1">
+                      {hotkey.modifiers?.ctrl && (
+                        <>
+                          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                            Ctrl
+                          </kbd>
+                          <span className="mx-1">+</span>
+                        </>
+                      )}
+                      {hotkey.modifiers?.shift && (
+                        <>
+                          <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                            Shift
+                          </kbd>
+                          <span className="mx-1">+</span>
+                        </>
+                      )}
+                      <kbd className={`px-2 py-1 text-xs font-semibold ${isDark ? 'text-gray-200 bg-gray-700 border-gray-600' : 'text-gray-800 bg-gray-100 border-gray-300'} border rounded-md`}>
+                        {hotkey.key === ' ' ? 'Space' : hotkey.key.toUpperCase()}
+                      </kbd>
+                    </div>
                   </div>
                 ))}
               </div>

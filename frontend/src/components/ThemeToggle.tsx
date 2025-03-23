@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useTheme } from 'next-themes';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from "next-themes";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const ThemeToggle = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -17,16 +17,16 @@ export const ThemeToggle = () => {
 
   return (
     <button
-      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className={`p-2 rounded-full transition-colors ${
-        resolvedTheme === 'dark' 
-          ? 'text-gray-300 hover:text-white hover:bg-gray-800' 
-          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+        resolvedTheme === "dark"
+          ? "text-gray-300 hover:text-white hover:bg-gray-800"
+          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
       }`}
       aria-label="Toggle theme"
     >
       <AnimatePresence mode="wait">
-        {resolvedTheme === 'dark' ? (
+        {resolvedTheme === "dark" ? (
           <motion.div
             key="moon"
             initial={{ rotate: -180, opacity: 0 }}
@@ -50,4 +50,4 @@ export const ThemeToggle = () => {
       </AnimatePresence>
     </button>
   );
-}; 
+};

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-interface Settings {
+export interface Settings {
   voice: {
     volume: number;
-    style: 'Natural' | 'Clear' | 'Detailed';
+    style: "Natural" | "Clear" | "Detailed";
     speechRate: number;
   };
   detection: {
     sensitivity: number;
-    range: 'Short (1-3m)' | 'Medium (3-5m)' | 'Long (5m+)';
-    updateFrequency: 'High (100ms)' | 'Medium (250ms)' | 'Low (500ms)';
+    range: "Short (1-3m)" | "Medium (3-5m)" | "Long (5m+)";
+    updateFrequency: "High (100ms)" | "Medium (250ms)" | "Low (500ms)";
   };
   accessibility: {
     highContrast: boolean;
@@ -21,21 +21,23 @@ interface Settings {
 
 interface SettingsContextType {
   settings: Settings;
-  updateVoiceSettings: (settings: Partial<Settings['voice']>) => void;
-  updateDetectionSettings: (settings: Partial<Settings['detection']>) => void;
-  updateAccessibilitySettings: (settings: Partial<Settings['accessibility']>) => void;
+  updateVoiceSettings: (settings: Partial<Settings["voice"]>) => void;
+  updateDetectionSettings: (settings: Partial<Settings["detection"]>) => void;
+  updateAccessibilitySettings: (
+    settings: Partial<Settings["accessibility"]>
+  ) => void;
 }
 
 const defaultSettings: Settings = {
   voice: {
     volume: 75,
-    style: 'Natural',
+    style: "Natural",
     speechRate: 50,
   },
   detection: {
     sensitivity: 50,
-    range: 'Medium (3-5m)',
-    updateFrequency: 'Medium (250ms)',
+    range: "Medium (3-5m)",
+    updateFrequency: "Medium (250ms)",
   },
   accessibility: {
     highContrast: false,
@@ -43,13 +45,15 @@ const defaultSettings: Settings = {
   },
 };
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined
+);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(() => {
     // Try to load settings from localStorage on initial render
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('settings');
+    if (typeof window !== "undefined") {
+      const savedSettings = localStorage.getItem("settings");
       if (savedSettings) {
         return JSON.parse(savedSettings);
       }
@@ -59,37 +63,43 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('settings', JSON.stringify(settings));
+    localStorage.setItem("settings", JSON.stringify(settings));
   }, [settings]);
 
-  const updateVoiceSettings = (newSettings: Partial<Settings['voice']>) => {
-    setSettings(prev => ({
+  const updateVoiceSettings = (newSettings: Partial<Settings["voice"]>) => {
+    setSettings((prev) => ({
       ...prev,
-      voice: { ...prev.voice, ...newSettings }
+      voice: { ...prev.voice, ...newSettings },
     }));
   };
 
-  const updateDetectionSettings = (newSettings: Partial<Settings['detection']>) => {
-    setSettings(prev => ({
+  const updateDetectionSettings = (
+    newSettings: Partial<Settings["detection"]>
+  ) => {
+    setSettings((prev) => ({
       ...prev,
-      detection: { ...prev.detection, ...newSettings }
+      detection: { ...prev.detection, ...newSettings },
     }));
   };
 
-  const updateAccessibilitySettings = (newSettings: Partial<Settings['accessibility']>) => {
-    setSettings(prev => ({
+  const updateAccessibilitySettings = (
+    newSettings: Partial<Settings["accessibility"]>
+  ) => {
+    setSettings((prev) => ({
       ...prev,
-      accessibility: { ...prev.accessibility, ...newSettings }
+      accessibility: { ...prev.accessibility, ...newSettings },
     }));
   };
 
   return (
-    <SettingsContext.Provider value={{
-      settings,
-      updateVoiceSettings,
-      updateDetectionSettings,
-      updateAccessibilitySettings,
-    }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateVoiceSettings,
+        updateDetectionSettings,
+        updateAccessibilitySettings,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );
@@ -98,7 +108,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error('useSettings must be used within a SettingsProvider');
+    throw new Error("useSettings must be used within a SettingsProvider");
   }
   return context;
-} 
+}

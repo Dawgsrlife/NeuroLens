@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { apiService } from "@/services/api";
 import { ProcessedFrame } from "@/types/api";
 import { MicrophoneIcon, StopIcon } from "@heroicons/react/24/solid";
-import { motion } from 'framer-motion';
-import { useTheme } from 'next-themes';
-import { MicrophoneIcon as OutlinedMicrophoneIcon } from '@heroicons/react/24/outline';
+import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { MicrophoneIcon as OutlinedMicrophoneIcon } from "@heroicons/react/24/outline";
 
 interface VoiceInteractionPanelProps {
   className?: string;
 }
 
-export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelProps) => {
+export const VoiceInteractionPanel = ({
+  className = "",
+}: VoiceInteractionPanelProps) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -22,7 +24,7 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
   const audioChunksRef = useRef<BlobPart[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const isDark = resolvedTheme === "dark";
 
   // Define handleMessage at the component level
   const handleMessage = (data: ProcessedFrame) => {
@@ -66,8 +68,11 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       }
     };
 
-    window.addEventListener('toggleRecording', handleToggleRecording as EventListener);
-    
+    window.addEventListener(
+      "toggleRecording",
+      handleToggleRecording as EventListener
+    );
+
     return () => {
       // Stop any ongoing speech when the component unmounts
       if ("speechSynthesis" in window) {
@@ -80,7 +85,10 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       }
 
       // Remove event listener
-      window.removeEventListener('toggleRecording', handleToggleRecording as EventListener);
+      window.removeEventListener(
+        "toggleRecording",
+        handleToggleRecording as EventListener
+      );
     };
   }, []);
 
@@ -171,11 +179,21 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className={`p-6 rounded-xl shadow-sm border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} ${className}`}
+      className={`p-6 rounded-xl shadow-sm border ${
+        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      } ${className}`}
     >
       <div className="flex items-center space-x-3 mb-4">
-        <OutlinedMicrophoneIcon className={`w-6 h-6 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
-        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <OutlinedMicrophoneIcon
+          className={`w-6 h-6 ${
+            isDark ? "text-purple-400" : "text-purple-500"
+          }`}
+        />
+        <h3
+          className={`text-lg font-semibold ${
+            isDark ? "text-white" : "text-gray-900"
+          }`}
+        >
           Voice Commands
         </h3>
       </div>
@@ -183,7 +201,7 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.5 }}
-        className={`space-y-3 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+        className={`space-y-3 ${isDark ? "text-gray-300" : "text-gray-600"}`}
       >
         <p>Available commands:</p>
         <ul className="list-disc list-inside space-y-2">
@@ -194,7 +212,7 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
         </ul>
       </motion.div>
       <div className="mt-4">
-        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+        <p className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}>
           {isListening
             ? `Listening... ${formatTime(recordingDuration)}`
             : isLoading
@@ -204,14 +222,32 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
       </div>
 
       {transcript && (
-        <div className={`mt-4 p-3 ${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded`}>
-          <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} italic`}>You said: "{transcript}"</p>
+        <div
+          className={`mt-4 p-3 ${
+            isDark ? "bg-gray-700" : "bg-gray-100"
+          } rounded`}
+        >
+          <p
+            className={`text-sm ${
+              isDark ? "text-gray-300" : "text-gray-600"
+            } italic`}
+          >
+            You said: "{transcript}"
+          </p>
         </div>
       )}
 
       {feedback && (
-        <div className={`mt-4 p-3 ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'} rounded`}>
-          <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>Assistant: "{feedback}"</p>
+        <div
+          className={`mt-4 p-3 ${
+            isDark ? "bg-blue-900/30" : "bg-blue-50"
+          } rounded`}
+        >
+          <p
+            className={`text-sm ${isDark ? "text-blue-300" : "text-blue-600"}`}
+          >
+            Assistant: "{feedback}"
+          </p>
         </div>
       )}
 
@@ -220,9 +256,9 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
           <button
             onClick={startListening}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              isDark 
-                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
+              isDark
+                ? "bg-blue-500 hover:bg-blue-600 text-white"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
             } transition-colors`}
           >
             <MicrophoneIcon className="w-5 h-5" />
@@ -232,9 +268,9 @@ export const VoiceInteractionPanel = ({ className = "" }: VoiceInteractionPanelP
           <button
             onClick={stopListening}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              isDark 
-                ? 'bg-red-500 hover:bg-red-600 text-white' 
-                : 'bg-red-500 hover:bg-red-600 text-white'
+              isDark
+                ? "bg-red-500 hover:bg-red-600 text-white"
+                : "bg-red-500 hover:bg-red-600 text-white"
             } transition-colors`}
           >
             <StopIcon className="w-5 h-5" />

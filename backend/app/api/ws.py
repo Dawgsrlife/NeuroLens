@@ -3,10 +3,10 @@ import json
 import logging
 import uuid
 import time
-import datetime
 from typing import Dict, List, Optional, Any, Callable
 import base64
 from starlette.websockets import WebSocketState
+from datetime import datetime
 
 from fastapi import WebSocket, WebSocketDisconnect, Depends, status
 from pydantic import ValidationError
@@ -105,18 +105,27 @@ class ConnectionManager:
             if processed_frame.raw_description:
                 self.memory_service.add_scene_description(processed_frame.raw_description)
             
-            # Send the processed frame back to the client
-            await self.send_message(connection_id, processed_frame.model_dump())
+            # Normalize the response to match the frontend's expected structure
+            normalized_frame = {
+                "captions": [caption.model_dump() for caption in processed_frame.captions],
+                "voiceFeedback": processed_frame.voiceFeedback.model_dump() if processed_frame.voiceFeedback else None,
+                "objects": processed_frame.objects  # This already contains name, distance, direction
+            }
+            
+            # Send the normalized frame back to the client
+            await self.send_message(connection_id, normalized_frame)
         
         except Exception as e:
-            logger.error(f"Error processing video frame: {str(e)}")
+            logger.error(f"Error processing video frame: {str(e)}", exc_info=True)
             error_message = {
                 "error": f"Error processing video frame: {str(e)}"
             }
             await self.send_message(connection_id, error_message)
     
     async def process_audio(self, connection_id: str, audio_data: bytes) -> None:
-        """Process audio from the client"""
+        """
+        Process audio from the client
+        """
         try:
             # Transcribe the audio
             transcription = await self.speech_service.transcribe_audio(audio_data)
@@ -135,14 +144,15 @@ class ConnectionManager:
             
             # Process the query with the agent
             try:
-                from datetime import datetime  # Add this import at the top of the file
-                
                 response, voice_feedback = await self.agent_service.process_query(
                     transcription, 
                     current_frame
                 )
                 
-                # Send the response text back to the client
+                # Create timestamp for response
+                timestamp = datetime.now().timestamp()
+                
+                # Send the response text back to the client with the expected structure
                 response_message = {
                     "captions": [
                         {
@@ -150,21 +160,23 @@ class ConnectionManager:
                             "text": transcription,
                             "type": "audio",
                             "priority": "medium",
-                            "timestamp": datetime.now().timestamp()
+                            "timestamp": timestamp
                         }
                     ],
                     "voiceFeedback": voice_feedback.model_dump() if voice_feedback and hasattr(voice_feedback, 'model_dump') else {
                         "text": str(response),
                         "priority": "medium",
-                        "timestamp": datetime.now().timestamp()
-                    }
+                        "timestamp": timestamp
+                    },
+                    "objects": []  # Include empty objects array to match expected structure
                 }
                 
                 await self.send_message(connection_id, response_message)
                 
             except Exception as e:
                 logger.error(f"Error processing query: {str(e)}", exc_info=True)
-                # Send a fallback response
+                # Send a fallback response with the expected structure
+                timestamp = datetime.now().timestamp()
                 error_message = {
                     "captions": [
                         {
@@ -172,14 +184,15 @@ class ConnectionManager:
                             "text": transcription, 
                             "type": "audio",
                             "priority": "medium",
-                            "timestamp": datetime.now().timestamp()
+                            "timestamp": timestamp
                         }
                     ],
                     "voiceFeedback": {
                         "text": f"I heard you say '{transcription}', but I'm having trouble processing your request right now. Please try again in a moment.",
                         "priority": "high",
-                        "timestamp": datetime.now().timestamp()
-                    }
+                        "timestamp": timestamp
+                    },
+                    "objects": []  # Include empty objects array to match expected structure
                 }
                 await self.send_message(connection_id, error_message)
                 
@@ -248,7 +261,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         logger.info(f"New WebSocket connection established: {connection_id}")
         
-        # Send a welcome message
+        # Send a welcome message - make sure it matches the expected frontend structure
         welcome_message = {
             "captions": [
                 {
@@ -256,9 +269,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     "text": "Connected to NeuroLens. Ready to assist you!",
                     "type": "visual",
                     "priority": "high",
-                    "timestamp": None
+                    "timestamp": datetime.now().timestamp()
                 }
-            ]
+            ],
+            "voiceFeedback": None,
+            "objects": []  # Empty objects array to match expected structure
         }
         await connection_manager.send_message(connection_id, welcome_message)
         

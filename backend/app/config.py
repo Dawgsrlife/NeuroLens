@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 class Settings(BaseSettings):
     # API keys
@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     YOLO_MODEL_PATH: Optional[str] = None  # If None, will download from ultralytics
     
     # Speech settings
-    STT_MODEL: str = "gpt-4o-mini-transcribe1"
-    TTS_MODEL: str = "gpt-4o-mini-tts1"
+    STT_MODEL: str = "gpt-4o-mini-transcribe"
+    TTS_MODEL: str = "gpt-4o-mini-tts"
     TTS_VOICE: str = "shimmer"  # Available voices: alloy, echo, fable, onyx, nova, shimmer
     
     # Agent settings

@@ -15,18 +15,43 @@ NeuroLens is an innovative application designed to assist individuals with visua
 ## Tech Stack
 
 ### Frontend
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- Framer Motion
+- Next.js 14 (App Router)
+- TypeScript 5.8
+- Tailwind CSS 4.0
+- Framer Motion 12.5
 - WebSocket API
 - Web Speech API
+- Additional Libraries:
+  - @headlessui/react 2.2
+  - @heroicons/react 2.2
+  - next-themes 0.4.6
+  - zustand 5.0.3
+  - gsap 3.12.7
+  - lenis 1.2.3
 
 ### Backend
-- FastAPI
-- OpenCV
-- OpenAI/Gemini APIs
-- WebSocket
+- FastAPI 0.115.11
+- OpenCV (opencv-python-headless 4.11.0.86)
+- OpenAI API 1.68.2
+- WebSocket (websockets 15.0.1)
+- Additional Libraries:
+  - Computer Vision:
+    - ultralytics 8.3.94 (YOLO)
+    - pytesseract 0.3.13 (OCR)
+    - pillow 11.1.0
+  - Audio Processing:
+    - pydub 0.25.1
+    - sounddevice 0.5.1
+    - scipy 1.15.2
+  - Deep Learning:
+    - torch 2.6.0
+    - torchvision 0.21.0
+  - Utilities:
+    - pydantic 2.10.6
+    - pydantic-settings 2.8.1
+    - python-dotenv 1.0.1
+    - python-multipart 0.0.20
+    - httpx 0.28.1
 
 ## Getting Started
 
@@ -66,7 +91,6 @@ NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
 
 # backend/.env
 OPENAI_API_KEY=your_openai_api_key
-GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### Running the Application
@@ -74,7 +98,7 @@ GEMINI_API_KEY=your_gemini_api_key
 1. Start the backend server:
 ```bash
 cd backend
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 2. Start the frontend development server:
@@ -102,6 +126,10 @@ npm run dev
 - `Esc`: Close modals
 - `Tab`: Navigate through interactive elements
 - `Enter`: Activate buttons and controls
+- `Ctrl/Cmd + D`: Toggle dark mode
+- `Ctrl/Cmd + ,`: Open settings
+- `Ctrl/Cmd + Shift + R`: Start/Stop recording
+- `Ctrl/Cmd + /`: Open about page
 
 ## Accessibility
 
@@ -128,5 +156,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - OpenAI for GPT and Whisper APIs
-- Google for Gemini API
 - The open-source community for various tools and libraries

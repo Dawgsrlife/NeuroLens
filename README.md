@@ -1,91 +1,103 @@
-# NeuroLens - AI-Powered Vision Assistant
+# NeuroLens – AI-Powered Vision Assistant
 
-NeuroLens is an innovative application designed to assist individuals with visual impairments by providing real-time visual feedback through AI-powered object detection and voice assistance.
+Empowering independence through real-time object detection and natural voice feedback, NeuroLens assists visually impaired users in navigating their environment with confidence.
 
-## Features
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?style=flat-square)](https://github.com/Dawgsrlife/NeuroLens)
+[![Frontend](https://img.shields.io/badge/Frontend-Next.js%2014-blue?style=flat-square)](https://github.com/Dawgsrlife/NeuroLens/tree/main/frontend)
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-green?style=flat-square)](https://github.com/Dawgsrlife/NeuroLens/tree/main/backend)
 
-- Real-time webcam feed processing
-- Object detection and recognition
-- Natural language voice feedback
-- Customizable detection sensitivity
-- Dark mode support
-- Keyboard shortcuts
-- Accessibility features
+## 🌟 Features
 
-## Tech Stack
+- Real-time webcam feed processing with YOLO models
+- Scene analysis powered by GPT-4
+- Natural voice feedback using Web Speech API
+- Voice command interaction
+- Customizable detection sensitivity and range
+- Light/Dark mode with system preference sync
+- Comprehensive keyboard shortcuts
+- Visual audio captions (e.g., "Footsteps," "Birds chirping")
+- High contrast mode and screen reader optimizations
+
+## 📸 Screenshots
+
+### Main Interface
+<div align="center">
+  <img src="frontend/public/NeuroLens HomePage UI Light.png" alt="NeuroLens Homepage in Light Mode" width="800"/>
+  <p><em>Light Mode Interface</em></p>
+  <img src="frontend/public/NeuroLens HomePage UI Dark.png" alt="NeuroLens Homepage in Dark Mode" width="800"/>
+  <p><em>Dark Mode Interface</em></p>
+</div>
+
+### Settings & About
+<div align="center">
+  <img src="frontend/public/Settings.png" alt="Settings Modal" width="400"/>
+  <p><em>Settings Modal</em></p>
+  <img src="frontend/public/About Page.png" alt="About Page" width="400"/>
+  <p><em>About Page</em></p>
+</div>
+
+### Keyboard Shortcuts
+<div align="center">
+  <img src="frontend/public/Keyboard Shortcuts.png" alt="Keyboard Shortcuts Guide" width="400"/>
+  <p><em>Keyboard Shortcuts Guide</em></p>
+</div>
+
+## 🛠️ Tech Stack
 
 ### Frontend
 - Next.js 14 (App Router)
 - TypeScript 5.8
 - Tailwind CSS 4.0
-- Framer Motion 12.5
+- Framer Motion
 - WebSocket API
 - Web Speech API
-- Additional Libraries:
-  - @headlessui/react 2.2
-  - @heroicons/react 2.2
-  - next-themes 0.4.6
-  - zustand 5.0.3
-  - gsap 3.12.7
-  - lenis 1.2.3
+- Libraries: @headlessui/react, @heroicons/react, next-themes, zustand, gsap, lenis
 
 ### Backend
-- FastAPI 0.115.11
-- OpenCV (opencv-python-headless 4.11.0.86)
-- OpenAI API 1.68.2
-- WebSocket (websockets 15.0.1)
-- Additional Libraries:
-  - Computer Vision:
-    - ultralytics 8.3.94 (YOLO)
-    - pytesseract 0.3.13 (OCR)
-    - pillow 11.1.0
-  - Audio Processing:
-    - pydub 0.25.1
-    - sounddevice 0.5.1
-    - scipy 1.15.2
-  - Deep Learning:
-    - torch 2.6.0
-    - torchvision 0.21.0
-  - Utilities:
-    - pydantic 2.10.6
-    - pydantic-settings 2.8.1
-    - python-dotenv 1.0.1
-    - python-multipart 0.0.20
-    - httpx 0.28.1
+- FastAPI
+- OpenCV (opencv-python-headless)
+- YOLO (ultralytics)
+- PyTesseract (OCR)
+- OpenAI API (GPT-4)
+- Pydub, Sounddevice (audio processing)
+- WebSocket server
+- Libraries: torch, pydantic, dotenv, httpx
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
 - Node.js 18+
 - Python 3.8+
-- Webcam
-- Microphone
+- Webcam + Microphone
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/NeuroLens.git
+```
+git clone https://github.com/Dawgsrlife/NeuroLens.git
 cd NeuroLens
 ```
 
 2. Install frontend dependencies:
-```bash
+```
 cd frontend
 npm install
 ```
 
 3. Install backend dependencies:
-```bash
+```
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
 4. Set up environment variables:
-```bash
+```
 # frontend/.env.local
 NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
 
@@ -95,65 +107,58 @@ OPENAI_API_KEY=your_openai_api_key
 
 ### Running the Application
 
-1. Start the backend server:
-```bash
+1. Start the backend:
+```
 cd backend
 uvicorn app.main:app --reload
 ```
 
-2. Start the frontend development server:
-```bash
+2. Start the frontend:
+```
 cd frontend
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:3000`
+3. Open your browser: `http://localhost:3000`
 
-## Usage
+## ⌨️ Keyboard Shortcuts
 
-1. Press the Space key to start/stop the assistant
-2. The webcam feed will be processed in real-time
-3. Detected objects and environmental information will be displayed as captions
-4. Voice feedback will be provided for important observations
-5. Use the settings modal to customize:
-   - Voice volume and style
-   - Detection sensitivity
-   - Detection range
+| Shortcut          | Action                       |
+|-------------------|------------------------------|
+| `Space`           | Toggle assistant on/off      |
+| `Ctrl/Cmd + D`    | Toggle dark/light mode       |
+| `Ctrl/Cmd + ,`    | Open Settings Modal          |
+| `Ctrl/Cmd + /`    | Open About Page              |
+| `Ctrl/Cmd + ⇧ + R`| Start/Stop recording         |
+| `Esc`             | Close modals                 |
+| `Tab` / `Enter`   | Navigate & activate UI       |
 
-## Keyboard Shortcuts
-
-- `Space`: Toggle assistant on/off
-- `Esc`: Close modals
-- `Tab`: Navigate through interactive elements
-- `Enter`: Activate buttons and controls
-- `Ctrl/Cmd + D`: Toggle dark mode
-- `Ctrl/Cmd + ,`: Open settings
-- `Ctrl/Cmd + Shift + R`: Start/Stop recording
-- `Ctrl/Cmd + /`: Open about page
-
-## Accessibility
+## ♿ Accessibility
 
 NeuroLens is designed with accessibility in mind:
+- High contrast mode
+- Screen reader support
+- Full keyboard navigation
+- Adjustable voice feedback and text size
 
-- High contrast mode support
-- Screen reader compatibility
-- Keyboard navigation
-- Customizable voice feedback
-- Adjustable text size and contrast
+## 🤝 Contributing
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+1. Fork this repo
+2. Create a new branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to GitHub: `git push origin feature/AmazingFeature`
 5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This is a hackathon project created for educational and demonstration purposes. All rights reserved.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- OpenAI for GPT and Whisper APIs
-- The open-source community for various tools and libraries
+- OpenAI (GPT, Whisper APIs)
+- The open-source community
+
+## 💡 Quote
+
+> "Technology is most powerful when it empowers the most vulnerable."  
+> That's the goal of **NeuroLens**.
